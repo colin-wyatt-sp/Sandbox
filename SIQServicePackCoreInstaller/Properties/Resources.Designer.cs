@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SIQServicePackCoreInstaller.Properties
+namespace SIQServicePackCoreInstaller.ViewModels.ViewModels.Properties
 {
 
 

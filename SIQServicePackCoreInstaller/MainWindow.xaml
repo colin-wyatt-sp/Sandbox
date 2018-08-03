@@ -4,11 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SIQServicePackCoreInstaller"
+        xmlns:vm="clr-namespace:SIQServicePackCoreInstaller.VMs"
         mc:Ignorable="d"
         Title="SecurityIQ Service Pack Core Installer" 
         Height="400" MinWidth="639" Width="639" MinHeight="200" d:DesignWidth="639"
         d:DataContext="{d:DesignInstance Type=local:ServicePackInstallerViewModel, IsDesignTimeCreatable=True}"
         >
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="90"></RowDefinition>
@@ -42,8 +44,21 @@
                 <ScrollViewer x:Name="scrollViewer"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto" >
-                    <TextBlock x:Name="outputTextBlock"
-                               Text="{Binding LogText}"></TextBlock>
+                    <ListBox ItemsSource="{Binding Path=LogItems}">
+                        <ListBox.Resources>
+                            <DataTemplate DataType="{x:Type vm:LogErrorItem}">
+                                <TextBlock Foreground="Black" Background="Red" Text="{Binding Message}"></TextBlock>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:LogWarnItem}">
+                                <TextBlock Foreground="Black" Background="DarkOrange" Text="{Binding Message}"></TextBlock>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:LogInfoItem}">
+                                <TextBlock Text="{Binding Message}"></TextBlock>
+                            </DataTemplate>
+                    </ListBox.Resources>
+                    </ListBox>
+                    <!--<TextBlock x:Name="outputTextBlock"
+                               Text="{Binding LogText}"></TextBlock>-->
                 </ScrollViewer>
             </Border>
 

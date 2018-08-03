@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -6,9 +7,11 @@ using System.Reflection;
 using System.ServiceProcess;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SIQServicePackCoreInstaller.VMs;
 using Path = System.IO.Path;
 
 namespace SIQServicePackCoreInstaller
@@ -24,12 +27,14 @@ namespace SIQServicePackCoreInstaller
         private string LogFilePath;
         private StreamWriter Writer;
         private ServicePackInstallerViewModel ViewModel;
+        
 
         public MainWindow()
         {
             InitializeComponent();
 
             ViewModel = new ServicePackInstallerViewModel();
+            
             this.DataContext = ViewModel;
         }
 
@@ -99,14 +104,22 @@ namespace SIQServicePackCoreInstaller
 
         private void Log(string message, bool writeToFile=true) {
 
-            ViewModel.LogText = ViewModel.LogText + Environment.NewLine + message;
-            //outputTextBlock.Text = outputTextBlock.Text + Environment.NewLine + message;
-            //scrollViewer.ScrollToEnd();
-            //outputTextBlock.InvalidateVisual();
-            //scrollViewer.InvalidateVisual();
+            try {
+                LogItem logItem = message.StartsWith("ERROR") ? new LogErrorItem { Message = message } :
+                    message.StartsWith("WARN") ? new LogWarnItem { Message = message } as LogItem :
+                    new LogInfoItem { Message = message };
 
-            if (writeToFile)
-                Writer.WriteLine(message);
+                ViewModel.LogItems.Add(logItem);
+
+                if (writeToFile)
+                    Writer.WriteLine(message);
+
+                this.Dispatcher.BeginInvoke(new Action(() => { scrollViewer.ScrollToEnd(); }));
+            }
+            catch (Exception e) {
+                MessageBox.Show(e.Message);
+            }
+            
         }
 
         private void TryApply(ServiceController serviceController, DirectoryInfo servicePackFolder) {
@@ -173,7 +186,9 @@ namespace SIQServicePackCoreInstaller
                     processFileName = runningProcess.MainModule.FileName;
                 }
                 catch (Exception) {
-                    //Log("ERROR: access denied.");
+                    // some processes don't like you looking at them.
+                    //Log("ERROR: access denied. " + runningProcess.ProcessName);
+                    //Log("WARN: test");
                     continue;
                 }
                     

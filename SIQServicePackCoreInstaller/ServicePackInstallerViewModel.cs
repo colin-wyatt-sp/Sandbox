@@ -1,25 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using SIQServicePackCoreInstaller.Annotations;
+using System.Windows.Data;
+using SIQServicePackCoreInstaller.VMs;
 
 namespace SIQServicePackCoreInstaller
 {
     public class ServicePackInstallerViewModel : INotifyPropertyChanged
     {
-        private string logText;
+        //private string logText;
         private string servicePackLocation;
+        private ObservableCollection<LogItem> logItems = new ObservableCollection<LogItem>();
+        private readonly object lockObject = new object();
 
-        public string LogText {
-            get {
-                return logText;
-            }
+        public ServicePackInstallerViewModel() {
+
+            BindingOperations.EnableCollectionSynchronization(logItems, lockObject);
+        }
+
+        public ObservableCollection<LogItem> LogItems {
+            get { return logItems; }
             set {
-                logText = value;
+                logItems = value;
                 OnPropertyChanged();
             }
         }
@@ -34,7 +41,6 @@ namespace SIQServicePackCoreInstaller
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
