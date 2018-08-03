@@ -6,16 +6,18 @@
         xmlns:local="clr-namespace:SIQServicePackCoreInstaller"
         mc:Ignorable="d"
         Title="SecurityIQ Service Pack Core Installer" 
-        Height="500" Width="800"
-        MinHeight="500" MinWidth="800">
+        Height="400" MinWidth="639" Width="639" MinHeight="200" d:DesignWidth="639"
+        d:DataContext="{d:DesignInstance Type=local:ServicePackInstallerViewModel, IsDesignTimeCreatable=True}"
+        >
     <Grid>
-        <DockPanel HorizontalAlignment="Left" 
-                   Height="449" 
-                   LastChildFill="True" 
-                   Margin="10,10,0,0" 
-                   VerticalAlignment="Top"
-                   Width="772">
-            <Grid DockPanel.Dock="Top"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0"
                   MinHeight="80" Height="81">
                 <Label Content="Service Pack Location:" 
                        HorizontalAlignment="Left" 
@@ -31,17 +33,21 @@
                          TextWrapping="Wrap" 
                          VerticalAlignment="Top" 
                          Width="427" 
-                         IsReadOnly="True" />
+                         IsReadOnly="True"
+                         Text="{Binding ServicePackLocation}"/>
                 <Button Content="..." HorizontalAlignment="Left" Margin="589,13,0,0" VerticalAlignment="Top" Width="28" RenderTransformOrigin="0.373,0" Height="23" Click="Button_Click"/>
             </Grid>
-            <Border BorderBrush="Blue" BorderThickness="1">
+
+            <Border Grid.Row="1" BorderBrush="Blue" BorderThickness="1">
                 <ScrollViewer x:Name="scrollViewer"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto" >
-                    <TextBlock x:Name="outputTextBlock"></TextBlock>
+                    <TextBlock x:Name="outputTextBlock"
+                               Text="{Binding LogText}"></TextBlock>
                 </ScrollViewer>
             </Border>
-        </DockPanel>
+
 
     </Grid>
+
 </Window>

@@ -1,20 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -32,10 +23,14 @@ namespace SIQServicePackCoreInstaller
         private string ThisExeFolderPath;
         private string LogFilePath;
         private StreamWriter Writer;
+        private ServicePackInstallerViewModel ViewModel;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            ViewModel = new ServicePackInstallerViewModel();
+            this.DataContext = ViewModel;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -48,7 +43,7 @@ namespace SIQServicePackCoreInstaller
                 if (result == System.Windows.Forms.DialogResult.OK
                     || result == System.Windows.Forms.DialogResult.Yes) {
 
-                    ServicePackLocationTextBox.Text = dialog.SelectedPath;
+                    ViewModel.ServicePackLocation = dialog.SelectedPath;
                     ApplyButton.IsEnabled = true;
                 }
             }
@@ -61,32 +56,36 @@ namespace SIQServicePackCoreInstaller
             LogFilePath = Path.Combine(ThisExeFolderPath, "output-" + TimeStamp + ".txt");
             Writer = new StreamWriter(LogFilePath);
 
-            try {
-                Log("Starting Core ServicePack install...");
-                TryApplyAllServices();
-                Log("Finished patching all services.");
-            }
-            catch (Exception ex) {
-                Log("ERROR: " + ex.Message);
-            }
-            finally {
-                Writer.Close();
-            }
+            Task.Factory.StartNew(TryApplyAllServices);
         }
 
         private void TryApplyAllServices() {
 
-            string[] jsonFiles = Directory.GetFiles(ServicePackLocationTextBox.Text, "*service.json", SearchOption.AllDirectories);
+            try {
+                Log("Starting Core ServicePack install...");
+                PerformApplyAllServices();
+                Log("Finished patching all services.");
+            }
+            catch (Exception e) {
+                Log("ERROR: " + e.Message);
+            }
+            finally {
+                Log("Output written to file: " + LogFilePath, writeToFile: false);
+                Writer.Close();
+            }
+        }
+
+        private void PerformApplyAllServices() {
+            string[] jsonFiles =
+                Directory.GetFiles(ViewModel.ServicePackLocation, "*service.json", SearchOption.AllDirectories);
             Log("service config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
 
             ServiceController[] services = ServiceController.GetServices();
             foreach (var jsonFile in jsonFiles) {
-
-                JObject jsonObject = (JObject)JsonConvert.DeserializeObject(File.ReadAllText(jsonFile));
+                JObject jsonObject = (JObject) JsonConvert.DeserializeObject(File.ReadAllText(jsonFile));
                 var serviceName = jsonObject["serviceName"].Value<string>();
                 Log("Searching for service with name: " + serviceName);
                 if (services.All(x => x.ServiceName != serviceName)) {
-
                     Log("Unable to find installed service matching name: " + serviceName + ".  Continuing.");
                     continue;
                 }
@@ -98,13 +97,16 @@ namespace SIQServicePackCoreInstaller
             }
         }
 
-        private void Log(string message) {
+        private void Log(string message, bool writeToFile=true) {
 
-            outputTextBlock.Text = outputTextBlock.Text + Environment.NewLine + message;
-            scrollViewer.ScrollToEnd();
-            scrollViewer.InvalidateVisual();
+            ViewModel.LogText = ViewModel.LogText + Environment.NewLine + message;
+            //outputTextBlock.Text = outputTextBlock.Text + Environment.NewLine + message;
+            //scrollViewer.ScrollToEnd();
+            //outputTextBlock.InvalidateVisual();
+            //scrollViewer.InvalidateVisual();
 
-            Writer.WriteLine(message);
+            if (writeToFile)
+                Writer.WriteLine(message);
         }
 
         private void TryApply(ServiceController serviceController, DirectoryInfo servicePackFolder) {
@@ -114,14 +116,14 @@ namespace SIQServicePackCoreInstaller
                 PerformApply(serviceController, servicePackFolder);
             }
             catch (Exception e) {
-                Log("ERROR applying service pack: " + e.Message);
+                Log("ERROR applying service pack for service \"" + serviceController.DisplayName + "\" : " + e.Message);
             }
         }
 
         private void PerformApply(ServiceController serviceController, DirectoryInfo servicePackFolder) {
 
-            Log("Stopping service " + serviceController.DisplayName + " ...");
             if (serviceController.Status != ServiceControllerStatus.Stopped) {
+                Log("Stopping service " + serviceController.DisplayName + " ...");
                 serviceController.Stop();
                 serviceController.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 3, 0));
                 if (serviceController.Status != ServiceControllerStatus.Stopped) {
@@ -131,7 +133,12 @@ namespace SIQServicePackCoreInstaller
                 }
             }
 
+            Log("Getting service path...");
             var serviceDirectory = new FileInfo(GetImagePath(serviceController.ServiceName)).Directory;
+            
+            Log("Checking for service processes still running...");
+            TryKillRogueProcesses(serviceDirectory);
+
             var serviceDirectoryBackupPath = serviceDirectory.FullName + "_BAK-" + TimeStamp;
             
             Log("Backing up service folder \"" + serviceDirectory + "\" to \"" + new DirectoryInfo(serviceDirectoryBackupPath).Name + "\"");
@@ -149,6 +156,41 @@ namespace SIQServicePackCoreInstaller
             }
             else {
                 Log("Completed patching service: " + serviceController.DisplayName);
+            }
+        }
+
+        private void TryKillRogueProcesses(DirectoryInfo serviceDirectory) {
+
+            //Log("calling GetProcesses...");
+            Process[] runningProcesses = Process.GetProcesses();
+            //Log("iterating over running processes...");
+            foreach (var runningProcess in runningProcesses) {
+
+                string processFileName;
+
+                try {
+                    //Log("DEBUG: process : " + runningProcess.ProcessName);
+                    processFileName = runningProcess.MainModule.FileName;
+                }
+                catch (Exception) {
+                    //Log("ERROR: access denied.");
+                    continue;
+                }
+                    
+                //Log("DEBUG: process: " + processFileName);
+                var directory = new FileInfo(processFileName).DirectoryName;
+                //Log("DEBUG: " + directory);
+                if (string.Compare(serviceDirectory.FullName, directory,
+                        StringComparison.InvariantCultureIgnoreCase) == 0) {
+
+                    try { 
+                        Log("Killing " + processFileName);
+                        runningProcess.Kill();
+                    }
+                    catch (Exception e) {
+                        Log("ERROR killing service process: " + processFileName + " : " + e.Message);
+                    }
+                }
             }
         }
 
