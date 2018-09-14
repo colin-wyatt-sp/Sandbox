@@ -25,18 +25,17 @@ namespace SIQServicePackCoreInstaller
         private DateTime CurrentDateTime;
         private string TimeStamp;
         private string ThisExeFolderPath;
-        private string LogFilePath;
-        private StreamWriter Writer;
         private ServicePackInstallerViewModel ViewModel;
-        
+        private Logger Logger;
+        private ProcessUtility processUtility;
+        private ServiceUpdater serviceUpdater;
+        private WebsiteUpdater websiteUpdater;
 
         public MainWindow()
         {
             InitializeComponent();
-
             ViewModel = new ServicePackInstallerViewModel();
-            
-            this.DataContext = ViewModel;
+            DataContext = ViewModel;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -58,182 +57,58 @@ namespace SIQServicePackCoreInstaller
         private void ApplyButton_Click(object sender, RoutedEventArgs e) {
 
             ViewModel.LogItems.Clear();
-            CurrentDateTime = DateTime.Now;
-            TimeStamp = CurrentDateTime.ToString("yyyyMMddHHmmss");
-            LogFilePath = Path.Combine(ThisExeFolderPath, "output-" + TimeStamp + ".txt");
-            Writer = new StreamWriter(LogFilePath);
-
-            Task.Factory.StartNew(TryApplyAllServices);
+            Task.Factory.StartNew(TryApplyAll);
         }
 
-        private void TryApplyAllServices() {
+        private void TryApplyAll() {
 
             try {
-                Log("Starting Core ServicePack install...");
-                PerformApplyAllServices();
-                Log("Finished patching all services.");
+                InitializeUpdaters();
+
+                Logger.Log("Starting Core ServicePack install...");
+
+                serviceUpdater.Update();
+                Logger.Log("Finished patching all services.");
+
+                websiteUpdater.Update();
+                Logger.Log("Finished patching all services.");
             }
             catch (Exception e) {
-                Log("ERROR: " + e.Message);
+                Logger.Log("ERROR: " + e.Message);
             }
             finally {
-                Log("Output written to file: " + LogFilePath, writeToFile: false);
-                Writer.Close();
+                DisposeLogger();
             }
         }
 
-        private void PerformApplyAllServices() {
+        private void InitializeUpdaters() {
 
-            string[] jsonFiles =
-                Directory.GetFiles(ViewModel.ServicePackLocation, "*service.json", SearchOption.AllDirectories);
+            InitializeLogger();
 
-            if (jsonFiles == null || jsonFiles.Length == 0) {
-                Log("WARN: " + "Did not find any \"service.json\" files. No services will be patched.");
-                return;
-            }
-            Log("Found the following service config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
-
-            ServiceController[] services = ServiceController.GetServices();
-            foreach (var jsonFile in jsonFiles) {
-                JObject jsonObject = (JObject) JsonConvert.DeserializeObject(File.ReadAllText(jsonFile));
-                var serviceName = jsonObject["serviceName"].Value<string>();
-                Log("Searching for service with name: " + serviceName);
-                if (services.All(x => x.ServiceName != serviceName)) {
-                    Log("Unable to find installed service matching name: " + serviceName + ".  Continuing.");
-                    continue;
-                }
-
-                var serviceController = services.First(x => x.ServiceName == serviceName);
-                DirectoryInfo servicePatchDirectory = new FileInfo(jsonFile).Directory;
-
-                TryApply(serviceController, servicePatchDirectory);
-            }
+            processUtility = new ProcessUtility(Logger);
+            serviceUpdater = new ServiceUpdater(ViewModel.ServicePackLocation, processUtility, TimeStamp, Logger);
+            websiteUpdater = new WebsiteUpdater(ViewModel.ServicePackLocation, processUtility, TimeStamp, Logger);
         }
 
-        private void TryApply(ServiceController serviceController, DirectoryInfo servicePackFolder) {
-            
-            try {
-                Log("Applying patch for service: " + serviceController.DisplayName);
-                PerformApply(serviceController, servicePackFolder);
-            }
-            catch (Exception e) {
-                Log("ERROR applying service pack for service \"" + serviceController.DisplayName + "\" : " + e.Message);
-            }
+        private void InitializeLogger() {
+
+            CurrentDateTime = DateTime.Now;
+            TimeStamp = CurrentDateTime.ToString("yyyyMMddHHmmss");
+            Logger = new Logger(TimeStamp);
+            Logger.MessageLogged += Logger_MessageLogged;
         }
 
-        private void PerformApply(ServiceController serviceController, DirectoryInfo servicePackFolder) {
 
-            if (serviceController.Status != ServiceControllerStatus.Stopped) {
-                Log("Stopping service " + serviceController.DisplayName + " ...");
-                serviceController.Stop();
-                serviceController.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 3, 0));
-                if (serviceController.Status != ServiceControllerStatus.Stopped) {
-                    Log("WARN: Service \"" + serviceController.DisplayName +
-                        "\" has not stopped in a timely manner. This service will not be patched; skipping.");
-                    return;
-                }
-                else {
-                    Thread.Sleep(500); // give the servie a few extra milliseconds to allow it's processes to completely stop.
-                }
-            }
-
-            Log("Getting service path...");
-            var serviceDirectory = new FileInfo(GetImagePath(serviceController.ServiceName)).Directory;
-            
-            Log("Stop any service processes still running...");
-            TryKillRogueProcesses(serviceDirectory);
-
-            var serviceDirectoryBackupPath = serviceDirectory.FullName + "_BAK-" + TimeStamp;
-            
-            Log("Backing up service folder \"" + serviceDirectory + "\" to \"" + new DirectoryInfo(serviceDirectoryBackupPath).Name + "\"");
-            var backupDirectoryInfo = Directory.CreateDirectory(serviceDirectoryBackupPath);
-            FileUtility.Copy(serviceDirectory.FullName, backupDirectoryInfo.FullName, null, overwrite: false);
-
-            Log("Copying service pack files from \"" + servicePackFolder.FullName + "\" to \"" + serviceDirectory.FullName + "\"");
-            FileUtility.Copy(servicePackFolder.FullName, serviceDirectory.FullName, new[] { "service.json" }, overwrite: true);
-
-            Log("Starting service " + serviceController.DisplayName + " ...");
-            serviceController.Start();
-            serviceController.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 3, 0));
-            if (serviceController.Status != ServiceControllerStatus.Running) {
-                Log("WARN: Service \"" + serviceController.DisplayName + "\" has been patched, but has not started in a timely manner. This may indicate a problem with the service. Continuing.");
-            }
-            else {
-                Log("Completed patching service: " + serviceController.DisplayName);
-            }
+        private void Logger_MessageLogged(LogItem logItem)
+        {
+            ViewModel.LogItems.Add(logItem);
+            Dispatcher.BeginInvoke(new Action(() => { scrollViewer.ScrollToEnd(); }));
         }
 
-        private void TryKillRogueProcesses(DirectoryInfo serviceDirectory) {
+        private void DisposeLogger() {
 
-            //Log("calling GetProcesses...");
-            Process[] runningProcesses = Process.GetProcesses();
-            //Log("iterating over running processes...");
-            foreach (var runningProcess in runningProcesses) {
-
-                string processFileName;
-
-                try {
-                    //Log("DEBUG: process : " + runningProcess.ProcessName);
-                    processFileName = runningProcess.MainModule.FileName;
-                }
-                catch (Exception) {
-                    // some processes don't like you looking at them.
-                    //Log("ERROR: access denied. " + runningProcess.ProcessName);
-                    //Log("WARN: test");
-                    continue;
-                }
-                    
-                //Log("DEBUG: process: " + processFileName);
-                var directory = new FileInfo(processFileName).DirectoryName;
-                //Log("DEBUG: " + directory);
-                if (string.Compare(serviceDirectory.FullName, directory,
-                        StringComparison.InvariantCultureIgnoreCase) == 0) {
-
-                    try { 
-                        Log("Killing " + processFileName);
-                        runningProcess.Kill();
-                    }
-                    catch (Exception e) {
-                        Log("ERROR killing service process: " + processFileName + " : " + e.Message);
-                    }
-                }
-            }
-        }
-
-        private string GetImagePath(string serviceName) {
-
-            string registryPath = @"SYSTEM\CurrentControlSet\Services\" + serviceName;
-            RegistryKey keyHKLM = Registry.LocalMachine;
-
-            RegistryKey key;
-            key = keyHKLM.OpenSubKey(registryPath);
-
-            string value = key.GetValue("ImagePath").ToString();
-            key.Close();
-
-            return Environment.ExpandEnvironmentVariables(value).Replace("\\\"", "").Replace("\"", "");
-        }
-
-        private void Log(string message, bool writeToFile = true) {
-
-            try {
-                LogItem logItem = message.StartsWith("ERROR") ? new LogErrorItem { Message = message } :
-                    message.StartsWith("WARN") ? new LogWarnItem { Message = message } as LogItem :
-                    new LogInfoItem { Message = message };
-
-                ViewModel.LogItems.Add(logItem);
-
-                if (writeToFile) {
-                    Writer.WriteLine(message);
-                    Writer.Flush();
-                }
-
-                this.Dispatcher.BeginInvoke(new Action(() => { scrollViewer.ScrollToEnd(); }));
-            }
-            catch (Exception e) {
-                MessageBox.Show("There was a problem logging: " + e.Message + ", LOG Message: " + message);
-            }
-
+            Logger.MessageLogged -= Logger_MessageLogged;
+            Logger.Dispose();
         }
     }
 }

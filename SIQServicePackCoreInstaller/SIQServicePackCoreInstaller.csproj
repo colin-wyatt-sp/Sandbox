@@ -36,6 +36,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -44,7 +47,6 @@
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -62,8 +64,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="FileUtility.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="LogItem.cs" />
+    <Compile Include="ProcessUtility.cs" />
     <Compile Include="ServicePackInstallerViewModel.cs" />
+    <Compile Include="ServiceUpdater.cs" />
+    <Compile Include="WebsiteInfo.cs" />
+    <Compile Include="WebsiteUpdater.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -101,6 +108,8 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="service.json" />
+    <None Include="website.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
