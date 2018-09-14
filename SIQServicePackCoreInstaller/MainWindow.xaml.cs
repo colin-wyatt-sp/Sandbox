@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -56,6 +57,7 @@ namespace SIQServicePackCoreInstaller
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e) {
 
+            ViewModel.LogItems.Clear();
             CurrentDateTime = DateTime.Now;
             TimeStamp = CurrentDateTime.ToString("yyyyMMddHHmmss");
             LogFilePath = Path.Combine(ThisExeFolderPath, "output-" + TimeStamp + ".txt");
@@ -81,9 +83,15 @@ namespace SIQServicePackCoreInstaller
         }
 
         private void PerformApplyAllServices() {
+
             string[] jsonFiles =
                 Directory.GetFiles(ViewModel.ServicePackLocation, "*service.json", SearchOption.AllDirectories);
-            Log("service config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
+
+            if (jsonFiles == null || jsonFiles.Length == 0) {
+                Log("WARN: " + "Did not find any \"service.json\" files. No services will be patched.");
+                return;
+            }
+            Log("Found the following service config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
 
             ServiceController[] services = ServiceController.GetServices();
             foreach (var jsonFile in jsonFiles) {
@@ -100,26 +108,6 @@ namespace SIQServicePackCoreInstaller
 
                 TryApply(serviceController, servicePatchDirectory);
             }
-        }
-
-        private void Log(string message, bool writeToFile=true) {
-
-            try {
-                LogItem logItem = message.StartsWith("ERROR") ? new LogErrorItem { Message = message } :
-                    message.StartsWith("WARN") ? new LogWarnItem { Message = message } as LogItem :
-                    new LogInfoItem { Message = message };
-
-                ViewModel.LogItems.Add(logItem);
-
-                if (writeToFile)
-                    Writer.WriteLine(message);
-
-                this.Dispatcher.BeginInvoke(new Action(() => { scrollViewer.ScrollToEnd(); }));
-            }
-            catch (Exception e) {
-                MessageBox.Show(e.Message);
-            }
-            
         }
 
         private void TryApply(ServiceController serviceController, DirectoryInfo servicePackFolder) {
@@ -144,22 +132,25 @@ namespace SIQServicePackCoreInstaller
                         "\" has not stopped in a timely manner. This service will not be patched; skipping.");
                     return;
                 }
+                else {
+                    Thread.Sleep(500); // give the servie a few extra milliseconds to allow it's processes to completely stop.
+                }
             }
 
             Log("Getting service path...");
             var serviceDirectory = new FileInfo(GetImagePath(serviceController.ServiceName)).Directory;
             
-            Log("Checking for service processes still running...");
+            Log("Stop any service processes still running...");
             TryKillRogueProcesses(serviceDirectory);
 
             var serviceDirectoryBackupPath = serviceDirectory.FullName + "_BAK-" + TimeStamp;
             
             Log("Backing up service folder \"" + serviceDirectory + "\" to \"" + new DirectoryInfo(serviceDirectoryBackupPath).Name + "\"");
             var backupDirectoryInfo = Directory.CreateDirectory(serviceDirectoryBackupPath);
-            Copy(serviceDirectory.FullName, backupDirectoryInfo.FullName);
+            FileUtility.Copy(serviceDirectory.FullName, backupDirectoryInfo.FullName, null, overwrite: false);
 
             Log("Copying service pack files from \"" + servicePackFolder.FullName + "\" to \"" + serviceDirectory.FullName + "\"");
-            Copy(servicePackFolder.FullName, serviceDirectory.FullName, overwrite: true);
+            FileUtility.Copy(servicePackFolder.FullName, serviceDirectory.FullName, new[] { "service.json" }, overwrite: true);
 
             Log("Starting service " + serviceController.DisplayName + " ...");
             serviceController.Start();
@@ -209,40 +200,40 @@ namespace SIQServicePackCoreInstaller
             }
         }
 
-        private void Copy(string sourceDir, string targetDir, bool overwrite=false) {
+        private string GetImagePath(string serviceName) {
 
-            Directory.CreateDirectory(targetDir);
-
-            foreach (var file in Directory.GetFiles(sourceDir)) {
-                if (file.EndsWith("service.json")) continue;
-                File.Copy(file, Path.Combine(targetDir, Path.GetFileName(file)), overwrite);
-            }
-
-            foreach (var directory in Directory.GetDirectories(sourceDir))
-                Copy(directory, Path.Combine(targetDir, Path.GetFileName(directory)));
-        }
-
-        private string GetImagePath(string serviceName)
-        {
             string registryPath = @"SYSTEM\CurrentControlSet\Services\" + serviceName;
             RegistryKey keyHKLM = Registry.LocalMachine;
 
             RegistryKey key;
-            //if (MachineName != "")
-            //{
-            //    key = RegistryKey.OpenRemoteBaseKey
-            //        (RegistryHive.LocalMachine, this.MachineName).OpenSubKey(registryPath);
-            //}
-            //else
-            //{
-                key = keyHKLM.OpenSubKey(registryPath);
-            //}
+            key = keyHKLM.OpenSubKey(registryPath);
 
             string value = key.GetValue("ImagePath").ToString();
             key.Close();
 
             return Environment.ExpandEnvironmentVariables(value).Replace("\\\"", "").Replace("\"", "");
-            //return value;
+        }
+
+        private void Log(string message, bool writeToFile = true) {
+
+            try {
+                LogItem logItem = message.StartsWith("ERROR") ? new LogErrorItem { Message = message } :
+                    message.StartsWith("WARN") ? new LogWarnItem { Message = message } as LogItem :
+                    new LogInfoItem { Message = message };
+
+                ViewModel.LogItems.Add(logItem);
+
+                if (writeToFile) {
+                    Writer.WriteLine(message);
+                    Writer.Flush();
+                }
+
+                this.Dispatcher.BeginInvoke(new Action(() => { scrollViewer.ScrollToEnd(); }));
+            }
+            catch (Exception e) {
+                MessageBox.Show("There was a problem logging: " + e.Message + ", LOG Message: " + message);
+            }
+
         }
     }
 }

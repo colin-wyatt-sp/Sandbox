@@ -61,6 +61,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FileUtility.cs" />
     <Compile Include="LogItem.cs" />
     <Compile Include="ServicePackInstallerViewModel.cs" />
     <Page Include="MainWindow.xaml">
