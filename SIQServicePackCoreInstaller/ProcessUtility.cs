@@ -10,12 +10,6 @@ namespace SIQServicePackCoreInstaller
 {
     public class ProcessUtility
     {
-        private Logger logger;
-
-        public ProcessUtility(Logger logger) {
-            this.logger = logger;
-        }
-
         public void TryKillRogueProcesses(DirectoryInfo serviceDirectory)
         {
             //Log("calling GetProcesses...");
@@ -48,12 +42,12 @@ namespace SIQServicePackCoreInstaller
 
                     try
                     {
-                        logger.Log("Killing " + processFileName);
+                        Logger.Log("Killing " + processFileName);
                         runningProcess.Kill();
                     }
                     catch (Exception e)
                     {
-                        logger.Log("ERROR killing service process: " + processFileName + " : " + e.Message);
+                        Logger.Log("ERROR killing service process: " + processFileName + " : " + e.Message);
                     }
                 }
             }

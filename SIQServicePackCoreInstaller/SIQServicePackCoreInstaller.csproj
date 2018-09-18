@@ -63,14 +63,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DirectoryUpdateJobInfo.cs" />
     <Compile Include="FileUtility.cs" />
+    <Compile Include="Interfaces\IUpdateJob.cs" />
+    <Compile Include="Interfaces\IUpdateJobFactory.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogItem.cs" />
     <Compile Include="ProcessUtility.cs" />
     <Compile Include="ServicePackInstallerViewModel.cs" />
-    <Compile Include="ServiceUpdater.cs" />
-    <Compile Include="WebsiteInfo.cs" />
-    <Compile Include="WebsiteUpdater.cs" />
+    <Compile Include="Service\ServiceUpdateJobFactory.cs" />
+    <Compile Include="Service\UpdateServiceJob.cs" />
+    <Compile Include="Website\UpdateWebsiteJob.cs" />
+    <Compile Include="Website\WebsiteUpdateJobInfo.cs" />
+    <Compile Include="Website\WebsiteUpdateJobFactory.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -108,8 +113,8 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="service.json" />
-    <None Include="website.json" />
+    <None Include="cfg\service.json" />
+    <None Include="cfg\website.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

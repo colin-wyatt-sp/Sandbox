@@ -7,11 +7,11 @@ using Microsoft.Web.Administration;
 
 namespace SIQServicePackCoreInstaller
 {
-    internal class WebsiteInfo
+    public class WebsiteUpdateJobInfo
     {
         public Site Site { get; set; }
 
-        public Application Application { get; set; }
-        public VirtualDirectory VirtualDir { get; set; }
+        public IDictionary<string, DirectoryUpdateJobInfo> ApplicationsDictionary { get; set; }
+
     }
 }

@@ -11,24 +11,29 @@ using SIQServicePackCoreInstaller.VMs;
 
 namespace SIQServicePackCoreInstaller
 {
-    public class Logger : IDisposable
+    public static class Logger
     {
-        private string ThisExeFolderPath;
-        private string LogFilePath;
-        private StreamWriter Writer;
-        private string TimeStamp;
+        private static string ThisExeFolderPath;
+        private static string LogFilePath;
+        private static StreamWriter Writer = null;
+        private static string timeStamp;
 
-        public Logger(string timestamp) {
-
-            ThisExeFolderPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
-            TimeStamp = timestamp;
-            LogFilePath = Path.Combine(ThisExeFolderPath, "output-" + TimeStamp + ".txt");
-            Writer = new StreamWriter(LogFilePath);
+        public static string Timestamp {
+            get {
+                return timeStamp;
+            }
+            set {
+                FlushAndCloseFile();
+                ThisExeFolderPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
+                timeStamp = value;
+                LogFilePath = Path.Combine(ThisExeFolderPath, "output-" + timeStamp + ".txt");
+                Writer = new StreamWriter(LogFilePath);
+            }
         }
 
-        public event Action<LogItem> MessageLogged;
+        public static event Action<LogItem> MessageLogged;
 
-        public void Log(string message, bool writeToFile = true) {
+        public static void Log(string message, bool writeToFile = true) {
 
             try
             {
@@ -48,7 +53,7 @@ namespace SIQServicePackCoreInstaller
             }
         }
 
-        public void LogToFile(string message) {
+        public static void LogToFile(string message) {
             try
             {
                 Writer.WriteLine(message);
@@ -67,13 +72,15 @@ namespace SIQServicePackCoreInstaller
             return logItem;
         }
 
-        protected virtual void OnMessageLogged(LogItem obj) {
+        private static void OnMessageLogged(LogItem obj) {
             MessageLogged?.Invoke(obj);
         }
 
-        public void Dispose() {
-            Log("Output written to file: " + LogFilePath, writeToFile: false);
-            Writer.Close();
+        private static void FlushAndCloseFile() {
+            if (Writer != null) {
+                Log("Output written to file: " + LogFilePath, writeToFile: false);
+                Writer.Close();
+            }
         }
     }
 }

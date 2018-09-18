@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -26,16 +27,16 @@ namespace SIQServicePackCoreInstaller
         private string TimeStamp;
         private string ThisExeFolderPath;
         private ServicePackInstallerViewModel ViewModel;
-        private Logger Logger;
         private ProcessUtility processUtility;
-        private ServiceUpdater serviceUpdater;
-        private WebsiteUpdater websiteUpdater;
+        private ServiceUpdateJobFactory _serviceUpdateJobFactory;
+        private WebsiteUpdateJobFactory _websiteUpdateJobFactory;
 
         public MainWindow()
         {
             InitializeComponent();
             ViewModel = new ServicePackInstallerViewModel();
             DataContext = ViewModel;
+            Logger.MessageLogged += Logger_MessageLogged;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -63,39 +64,42 @@ namespace SIQServicePackCoreInstaller
         private void TryApplyAll() {
 
             try {
-                InitializeUpdaters();
+                InitializeLogger();
 
-                Logger.Log("Starting Core ServicePack install...");
+                var updateJobFactories = getUpdateFactories();
 
-                serviceUpdater.Update();
-                Logger.Log("Finished patching all services.");
-
-                websiteUpdater.Update();
-                Logger.Log("Finished patching all services.");
+                Logger.Log("Starting ServicePack install...");
+                foreach (var factory in updateJobFactories) {
+                    var jobs = factory.GetJobs().ToList();
+                    if (jobs.Any()) {
+                        Logger.Log($"Beginning {factory.Name} updates");
+                        foreach (var updateJob in jobs) {
+                            updateJob.PerformUpdate();
+                        }
+                        Logger.Log($"Finished updating for {factory.Name} types");
+                    }
+                    else {
+                        Logger.Log($"No update jobs created for {factory.Name} update type");
+                    }
+                }
             }
             catch (Exception e) {
                 Logger.Log("ERROR: " + e.Message);
             }
-            finally {
-                DisposeLogger();
-            }
         }
 
-        private void InitializeUpdaters() {
+        private IEnumerable<IUpdateJobFactory> getUpdateFactories() {
 
-            InitializeLogger();
-
-            processUtility = new ProcessUtility(Logger);
-            serviceUpdater = new ServiceUpdater(ViewModel.ServicePackLocation, processUtility, TimeStamp, Logger);
-            websiteUpdater = new WebsiteUpdater(ViewModel.ServicePackLocation, processUtility, TimeStamp, Logger);
+            processUtility = new ProcessUtility();
+            yield return new ServiceUpdateJobFactory(ViewModel.ServicePackLocation, processUtility);
+            yield return new WebsiteUpdateJobFactory(ViewModel.ServicePackLocation, processUtility);
         }
 
         private void InitializeLogger() {
 
             CurrentDateTime = DateTime.Now;
             TimeStamp = CurrentDateTime.ToString("yyyyMMddHHmmss");
-            Logger = new Logger(TimeStamp);
-            Logger.MessageLogged += Logger_MessageLogged;
+            Logger.Timestamp = TimeStamp;
         }
 
 
@@ -105,10 +109,5 @@ namespace SIQServicePackCoreInstaller
             Dispatcher.BeginInvoke(new Action(() => { scrollViewer.ScrollToEnd(); }));
         }
 
-        private void DisposeLogger() {
-
-            Logger.MessageLogged -= Logger_MessageLogged;
-            Logger.Dispose();
-        }
     }
 }
