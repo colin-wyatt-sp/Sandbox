@@ -63,7 +63,7 @@ namespace SIQServicePackCoreInstaller {
 
                 var updateJobFactories = getUpdateFactories();
 
-                Logger.log("Starting ServicePack install");
+                Logger.log("Starting service pack install. Location:" + _viewModel.ServicePackLocation);
                 foreach (var factory in updateJobFactories) {
 
                     var jobs = factory.getJobs().ToList();
@@ -83,6 +83,7 @@ namespace SIQServicePackCoreInstaller {
             catch (Exception e) {
                 Logger.log("ERROR: " + e.Message);
             }
+            Logger.log("Finished ServicePack install");
         }
 
         private static void doJobUpdate(IUpdateJob updateJob) {

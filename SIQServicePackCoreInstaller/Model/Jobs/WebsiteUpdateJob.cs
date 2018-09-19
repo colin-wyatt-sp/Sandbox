@@ -19,8 +19,6 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
         public void performUpdate() { 
 
             Site site = _jobInfo.Site;
-            Logger.log("Applying updates for website: " + site.Name);
-
             bool websiteStopped = stopWebsite(site);
 
             if (websiteStopped) {
@@ -48,7 +46,7 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
 
             if (site.State != ObjectState.Stopped) {
 
-                Logger.log("Stopping website " + site.Name + " ...");
+                Logger.log("Stopping " + site.Name);
                 site.Stop();
                 Thread.Sleep(3000);
                 if (site.State != ObjectState.Stopped) {
@@ -61,14 +59,14 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
 
         private void startWebsite(Site site) {
 
-            Logger.log("Starting website " + site.Name + " ...");
+            Logger.log("Starting " + site.Name);
             site.Start();
             Thread.Sleep(3000);
             if (site.State != ObjectState.Started) {
                 Logger.log("WARN: Service \"" + site.Name + "\" has been updated, but has not started in a timely manner. This may indicate a problem with the website. Continuing.");
             }
             else {
-                Logger.log("Completed updating website: " + site.Name);
+                Logger.logToFile("Completed updating website: " + site.Name);
             }
         }
 

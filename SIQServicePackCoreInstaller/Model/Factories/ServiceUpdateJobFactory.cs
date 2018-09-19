@@ -28,7 +28,7 @@ namespace SIQServicePackCoreInstaller.Model.Factories  {
             if (jsonFiles.Length == 0) {
                 return new List<IUpdateJob>();
             }
-            Logger.log("Found the following service config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
+            Logger.logToFile("Found the following service config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
 
             var jobs = new List<IUpdateJob>();
             ServiceController[] services = ServiceController.GetServices();
@@ -37,12 +37,12 @@ namespace SIQServicePackCoreInstaller.Model.Factories  {
                 JObject jsonObject = (JObject)JsonConvert.DeserializeObject(File.ReadAllText(jsonFile));
 
                 var serviceName = jsonObject["serviceName"].Value<string>();
-                Logger.log("Searching for service with name: " + serviceName);
+                Logger.logToFile("Searching for service with name: " + serviceName);
                 if (services.All(x => !Regex.Match(x.ServiceName, serviceName).Success))
                 {
                     //// TODO: remove - this is for dev testing only
                     //jobs.AddRange(new XmlUpdateJobFactory(new FileInfo(jsonFile).Directory.FullName, jsonFile).getJobs());
-                    Logger.log("Unable to find installed service matching name: " + serviceName + ".  Continuing.");
+                    Logger.log("WARN: Unable to find installed service matching name: " + serviceName + ".  Continuing.");
                     continue;
                 }
 

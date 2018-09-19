@@ -57,11 +57,11 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
 
         private void updateServiceFiles() {
             var job = new DirectoryUpdateJob(new DirectoryUpdateJobInfo {
-                Name = "Service " + _serviceController.ServiceName,
+                Name = _serviceController.ServiceName,
                 LocationToUpdate =
                     new FileInfo(RegistryUtility.getServicePath(_serviceController.ServiceName)).Directory.FullName,
                 DirectoryWithFileUpdates = _servicePackFolder.FullName,
-                FileExcludeList = new[] {"service.json"}
+                FileExcludeList = new[] {"service.json", "app.config.update" }
             });
             job.performUpdate();
         }
@@ -76,7 +76,7 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
                            "\" has been patched, but has not started in a timely manner. This may indicate a problem with the service. Continuing.");
             }
             else {
-                Logger.log($"Completed patching service: {serviceController.DisplayName}");
+                Logger.logToFile($"Finished updating service: {serviceController.DisplayName}");
             }
         }
 

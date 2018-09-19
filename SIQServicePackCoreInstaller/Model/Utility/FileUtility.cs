@@ -21,7 +21,7 @@ namespace SIQServicePackCoreInstaller.Model.Utility
             }
 
             if (unblockFiles) {
-                Logger.log($"Unblocking files at {targetDir}");
+                Logger.logToFile($"Unblocking files at {targetDir}");
                 unblock(targetDir);
             }
 

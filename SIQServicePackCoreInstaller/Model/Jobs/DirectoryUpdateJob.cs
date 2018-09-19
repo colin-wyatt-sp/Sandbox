@@ -18,21 +18,21 @@ namespace SIQServicePackCoreInstaller.Model.Jobs
 
         public void performUpdate() {
 
-            Logger.log($"Getting {_info.Name} path...");
+            Logger.logToFile($"Getting {_info.Name} path");
             var destinationDirectoryPath = _info.LocationToUpdate;
             var destinationBackupPath = destinationDirectoryPath + "_BAK-" + Logger.Timestamp;
             var sourceDirectoryPath = _info.DirectoryWithFileUpdates;
 
-            Logger.log("Stop any processes still running...");
+            Logger.log("Stop any processes still running");
             ProcessUtility.tryKillRogueProcesses(new DirectoryInfo(destinationDirectoryPath));
 
             Logger.log(
-                $"Backing up {_info.Name} folder \"{destinationDirectoryPath}\" to \"{new DirectoryInfo(destinationBackupPath).Name}\"");
+                $"Backing up \"{destinationDirectoryPath}\" to \"{new DirectoryInfo(destinationBackupPath).Name}\"");
 
             var backupDirectoryInfo = Directory.CreateDirectory(destinationBackupPath);
             FileUtility.copy(destinationDirectoryPath, backupDirectoryInfo.FullName, fileExcludeList: null, overwrite: false);
 
-            Logger.log($"Copy service pack files from \"{sourceDirectoryPath}\" to \"{destinationDirectoryPath}\"");
+            Logger.log($"Copying service pack files from \"{sourceDirectoryPath}\" to \"{destinationDirectoryPath}\"");
             FileUtility.copy(sourceDirectoryPath, destinationDirectoryPath, _info.FileExcludeList, overwrite: true, unblockFiles: true);
 
         }

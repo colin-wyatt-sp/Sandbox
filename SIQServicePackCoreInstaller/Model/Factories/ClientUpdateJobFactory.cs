@@ -10,8 +10,9 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
         private readonly string _servicePackLocation;
 
         private static string SecurityIqHomeEnvKey = "SECURITYIQ_HOME";
+        private static string SecurityIQSubPath = "SecurityIQ";
         private static string ClientFolderName = "Client";
-        private static string DefaultClientParentFolderPath = "C:\\Program Files\\SailPoint";
+        private static string DefaultClientParentFolderPath = "C:\\Program Files\\SailPoint\\SecurityIQ";
 
 
         public ClientUpdateJobFactory(string servicePackLocation) {
@@ -29,10 +30,18 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
             }
 
             string securityIQHome = System.Environment.GetEnvironmentVariable(SecurityIqHomeEnvKey);
-            if (string.IsNullOrWhiteSpace(securityIQHome)) {
-                securityIQHome = DefaultClientParentFolderPath;
+            string candidateClientPath = null;
+            Logger.logToFile("SecurityIQHome: " + securityIQHome);
+            if (!string.IsNullOrWhiteSpace(securityIQHome)) {
+                candidateClientPath = Path.Combine(securityIQHome, SecurityIQSubPath);
+                candidateClientPath = Path.Combine(candidateClientPath, ClientFolderName);
             }
-            var candidateClientPath = Path.Combine(securityIQHome, ClientFolderName);
+            if (string.IsNullOrWhiteSpace(candidateClientPath) || !Directory.Exists(candidateClientPath)) {
+                Logger.logToFile("SecurityIQ_HOME env var is null or empty, using \"" + DefaultClientParentFolderPath + "\"");
+                candidateClientPath = Path.Combine(DefaultClientParentFolderPath, ClientFolderName);
+            }
+
+            Logger.logToFile("candidateClientPath: " + candidateClientPath);
             if (Directory.Exists(candidateClientPath)) {
                 return new[] {
                     new DirectoryUpdateJob(new DirectoryUpdateJobInfo {

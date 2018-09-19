@@ -28,7 +28,7 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
                 return new List<IUpdateJob>();
             }
 
-            Logger.log("Found the following website config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
+            Logger.logToFile("Found the following website config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
 
             List<WebsiteUpdateJobInfo> websiteJobs = new List<WebsiteUpdateJobInfo>();
             ServerManager server = new ServerManager();
@@ -37,7 +37,7 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
                 foreach (var jsonFile in jsonFiles) {
                     JObject jsonObject = (JObject) JsonConvert.DeserializeObject(File.ReadAllText(jsonFile));
                     var websiteName = jsonObject["websiteName"].Value<string>();
-                    Logger.log("Searching for website with name: " + websiteName);
+                    Logger.logToFile("Searching for website with name: " + websiteName);
                     Site site;
                     string websiteLocation = getWebAppLocation(websiteName, sites, out site);
                     if (string.IsNullOrWhiteSpace(websiteLocation)) {

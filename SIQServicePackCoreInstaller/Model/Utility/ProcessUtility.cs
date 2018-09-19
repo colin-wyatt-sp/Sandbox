@@ -38,7 +38,7 @@ namespace SIQServicePackCoreInstaller.Model.Utility {
 
                     try
                     {
-                        Logger.log("Killing " + processFileName);
+                        Logger.logToFile("Killing " + processFileName);
                         runningProcess.Kill();
                     }
                     catch (Exception e)
