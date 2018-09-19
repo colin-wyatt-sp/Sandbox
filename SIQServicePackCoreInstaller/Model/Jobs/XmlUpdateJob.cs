@@ -16,6 +16,8 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
             _textToReplace = textToReplace;
         }
 
+        public string Name => _xmlDocToUpdatePath;
+
         public void performUpdate() {
 
             string textToUpdate = File.ReadAllText(_xmlDocToUpdatePath);
@@ -29,6 +31,11 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
             }
             
             File.WriteAllText(_xmlDocToUpdatePath, textToUpdate);
+        }
+
+        public override string ToString()
+        {
+            return $"XmlUpdateJob {_xmlDocToUpdatePath}";
         }
     }
 }

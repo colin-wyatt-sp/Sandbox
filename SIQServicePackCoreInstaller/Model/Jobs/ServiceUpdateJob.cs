@@ -11,61 +11,64 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
     public class ServiceUpdateJob : IUpdateJob {
 
         private readonly ServiceController _serviceController;
-        private readonly DirectoryInfo _servicePatchDirectory;
+        private readonly DirectoryInfo _servicePackFolder;
         private readonly IEnumerable<IUpdateJob> _auxiallaryJobs;
 
-        public ServiceUpdateJob(ServiceController serviceController, DirectoryInfo servicePatchDirectory,
+        public ServiceUpdateJob(ServiceController serviceController, DirectoryInfo servicePackFolder,
             IEnumerable<IUpdateJob> auxiallaryJobs)
         {
             this._serviceController = serviceController;
-            this._servicePatchDirectory = servicePatchDirectory;
+            this._servicePackFolder = servicePackFolder;
             _auxiallaryJobs = auxiallaryJobs;
         }
 
+        public string Name => _serviceController.ServiceName;
+
         public void performUpdate() {
 
-            try
-            {
-                Logger.log("Applying patch for service: " + _serviceController.DisplayName);
-                performApply(_serviceController, _servicePatchDirectory);
-            }
-            catch (Exception e)
-            {
-                Logger.log("ERROR applying service pack for service \"" + _serviceController.DisplayName + "\" : " + e.Message);
-            }
-        }
-
-        private void performApply(ServiceController serviceController, DirectoryInfo servicePackFolder) {
-
-            bool isStopped = stopService(serviceController);
+            bool isStopped = stopService(_serviceController);
             if (!isStopped) {
-                Logger.log("WARN: Service \"" + serviceController.DisplayName +
+                Logger.log("WARN: Service \"" + _serviceController.DisplayName +
                            "\" has not stopped in a timely manner. This service will not be patched; skipping.");
                 return;
             }
 
-            var job = new DirectoryUpdateJob(new DirectoryUpdateJobInfo {
-                Name = "Service " + serviceController.ServiceName,
-                LocationToUpdate = new FileInfo(RegistryUtility.getServicePath(serviceController.ServiceName)).Directory.FullName,
-                DirectoryWithFileUpdates = servicePackFolder.FullName,
-                FileExcludeList = new[] { "service.json" }
-            });
-            job.performUpdate();
+            try {
+                updateServiceFiles();
+                runAuxialliaryJobs();
+            }
+            catch (Exception e) {
+                Logger.log($"ERROR: There was a problem updating service {Name} files. ExceptionMsg: {e.Message}");
+            }
 
+            startService(_serviceController);
+        }
+
+        private void runAuxialliaryJobs() {
             try {
                 foreach (var auxiallaryJob in _auxiallaryJobs) {
                     auxiallaryJob.performUpdate();
                 }
             }
             catch (Exception e) {
-                Logger.log($"ERROR: executing auxiallary jobs for service {serviceController.DisplayName} : {e.Message}");
+                Logger.log($"ERROR: executing auxiallary jobs for service {_serviceController.DisplayName} : {e.Message}");
             }
+        }
 
-            startService(serviceController);
+        private void updateServiceFiles() {
+            var job = new DirectoryUpdateJob(new DirectoryUpdateJobInfo {
+                Name = "Service " + _serviceController.ServiceName,
+                LocationToUpdate =
+                    new FileInfo(RegistryUtility.getServicePath(_serviceController.ServiceName)).Directory.FullName,
+                DirectoryWithFileUpdates = _servicePackFolder.FullName,
+                FileExcludeList = new[] {"service.json"}
+            });
+            job.performUpdate();
         }
 
         private static void startService(ServiceController serviceController) {
-            Logger.log("Starting service " + serviceController.DisplayName + " ...");
+
+            Logger.log($"Starting service {serviceController.DisplayName} ...");
             serviceController.Start();
             serviceController.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 3, 0));
             if (serviceController.Status != ServiceControllerStatus.Running) {
@@ -73,7 +76,7 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
                            "\" has been patched, but has not started in a timely manner. This may indicate a problem with the service. Continuing.");
             }
             else {
-                Logger.log("Completed patching service: " + serviceController.DisplayName);
+                Logger.log($"Completed patching service: {serviceController.DisplayName}");
             }
         }
 
@@ -91,6 +94,11 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
             }
 
             return true;
+        }
+
+        public override string ToString()
+        {
+            return $"ServiceUpdateJob {Name}";
         }
     }
 }

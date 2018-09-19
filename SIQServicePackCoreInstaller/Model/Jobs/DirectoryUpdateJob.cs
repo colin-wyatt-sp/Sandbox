@@ -14,16 +14,10 @@ namespace SIQServicePackCoreInstaller.Model.Jobs
             _info = info;
         }
 
-        public void performUpdate() {
-            try {
-                updateDirectories();
-            }
-            catch (Exception e) {
-                Logger.log($"ERROR: while updating files from {_info.DirectoryWithFileUpdates} to {_info.LocationToUpdate}. Msg: {e.Message}");
-            }
-        }
+        public string Name => _info.Name;
 
-        private void updateDirectories() {
+        public void performUpdate() {
+
             Logger.log($"Getting {_info.Name} path...");
             var destinationDirectoryPath = _info.LocationToUpdate;
             var destinationBackupPath = destinationDirectoryPath + "_BAK-" + Logger.Timestamp;
@@ -36,10 +30,16 @@ namespace SIQServicePackCoreInstaller.Model.Jobs
                 $"Backing up {_info.Name} folder \"{destinationDirectoryPath}\" to \"{new DirectoryInfo(destinationBackupPath).Name}\"");
 
             var backupDirectoryInfo = Directory.CreateDirectory(destinationBackupPath);
-            FileUtility.copy(destinationDirectoryPath, backupDirectoryInfo.FullName, null, overwrite: false);
+            FileUtility.copy(destinationDirectoryPath, backupDirectoryInfo.FullName, fileExcludeList: null, overwrite: false);
 
-            Logger.log($"Copying service pack files from \"{sourceDirectoryPath}\" to \"{destinationDirectoryPath}\"");
-            FileUtility.copy(sourceDirectoryPath, destinationDirectoryPath, _info.FileExcludeList, overwrite: true);
+            Logger.log($"Copy service pack files from \"{sourceDirectoryPath}\" to \"{destinationDirectoryPath}\"");
+            FileUtility.copy(sourceDirectoryPath, destinationDirectoryPath, _info.FileExcludeList, overwrite: true, unblockFiles: true);
+
         }
+
+        public override string ToString() {
+            return $"DirectoryUpdateJob {Name}, source:{_info.DirectoryWithFileUpdates}, dest:{_info.LocationToUpdate}";
+        }
+
     }
 }

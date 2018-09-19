@@ -14,30 +14,17 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
             this._jobInfo = jobInfo;
         }
 
+        public string Name => _jobInfo.Site.Name;
+
         public void performUpdate() { 
 
             Site site = _jobInfo.Site;
-            try {
-                doPerformUpdate(site);
-            }
-            catch (Exception e)
-            {
-                Logger.log("ERROR applying service pack for website \"" + site.Name + "\" : " + e.Message);
-            }
-        }
-
-        private void doPerformUpdate(Site site) {
-
             Logger.log("Applying updates for website: " + site.Name);
 
             bool websiteStopped = stopWebsite(site);
 
             if (websiteStopped) {
-                foreach (string applicationName in _jobInfo.ApplicationsDictionary.Keys) {
-                    var directoryUpdateJobInfo = _jobInfo.ApplicationsDictionary[applicationName];
-                    updateWebApp(applicationName, directoryUpdateJobInfo);
-                }
-
+                updateWebApps();
                 startWebsite(site);
             }
             else {
@@ -45,16 +32,26 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
             }
         }
 
-        private bool stopWebsite(Site site)
-        {
+        private void updateWebApps() {
+            try {
+                foreach (string applicationName in _jobInfo.ApplicationsDictionary.Keys) {
+                    var directoryUpdateJobInfo = _jobInfo.ApplicationsDictionary[applicationName];
+                    updateWebApp(applicationName, directoryUpdateJobInfo);
+                }
+            }
+            catch (Exception e) {
+                Logger.log($"ERROR: Problem updating web apps {Name}, ExceptionMsg: {e.Message}");
+            }
+        }
 
-            if (site.State != ObjectState.Stopped)
-            {
+        private bool stopWebsite(Site site) {
+
+            if (site.State != ObjectState.Stopped) {
+
                 Logger.log("Stopping website " + site.Name + " ...");
                 site.Stop();
                 Thread.Sleep(3000);
-                if (site.State != ObjectState.Stopped)
-                {
+                if (site.State != ObjectState.Stopped) {
                     return false;
                 }
             }
@@ -62,28 +59,25 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
             return true;
         }
 
-        private void startWebsite(Site site)
-        {
+        private void startWebsite(Site site) {
+
             Logger.log("Starting website " + site.Name + " ...");
             site.Start();
             Thread.Sleep(3000);
-            if (site.State != ObjectState.Started)
-            {
+            if (site.State != ObjectState.Started) {
                 Logger.log("WARN: Service \"" + site.Name + "\" has been updated, but has not started in a timely manner. This may indicate a problem with the website. Continuing.");
             }
-            else
-            {
+            else {
                 Logger.log("Completed updating website: " + site.Name);
             }
         }
 
-        private void updateWebApp(string applicationName, DirectoryUpdateJobInfo directoryUpdateJobInfo)
-        {
+        private void updateWebApp(string applicationName, DirectoryUpdateJobInfo directoryUpdateJobInfo) {
+
             try {
                 doUpdateWebApp(directoryUpdateJobInfo);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Logger.log("ERROR applying service pack for website application \"" + applicationName +
                            "\" : " + e.Message);
             }
@@ -92,6 +86,11 @@ namespace SIQServicePackCoreInstaller.Model.Jobs {
         private void doUpdateWebApp(DirectoryUpdateJobInfo directoryUpdateJobInfo) {
 
             new DirectoryUpdateJob(directoryUpdateJobInfo).performUpdate();
+        }
+
+        public override string ToString()
+        {
+            return $"WebsiteUpdateJob {Name}";
         }
     }
 }

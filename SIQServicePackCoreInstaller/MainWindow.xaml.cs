@@ -63,15 +63,17 @@ namespace SIQServicePackCoreInstaller {
 
                 var updateJobFactories = getUpdateFactories();
 
-                Logger.log("Starting ServicePack install...");
+                Logger.log("Starting ServicePack install");
                 foreach (var factory in updateJobFactories) {
+
                     var jobs = factory.getJobs().ToList();
                     if (jobs.Any()) {
+
                         Logger.log($"Beginning {factory.Name} updates");
                         foreach (var updateJob in jobs) {
-                            updateJob.performUpdate();
+                            doJobUpdate(updateJob);
                         }
-                        Logger.log($"Finished updating for {factory.Name} types");
+                        Logger.log($"Finished updating {factory.Name}s");
                     }
                     else {
                         Logger.log($"No update jobs created for {factory.Name} update type");
@@ -80,6 +82,17 @@ namespace SIQServicePackCoreInstaller {
             }
             catch (Exception e) {
                 Logger.log("ERROR: " + e.Message);
+            }
+        }
+
+        private static void doJobUpdate(IUpdateJob updateJob) {
+
+            try {
+                Logger.log($"Updating {updateJob.Name}");
+                updateJob.performUpdate();
+            }
+            catch (Exception e) {
+                Logger.log($"ERROR: There was a problem updating {updateJob}, ExceptionMsg: {e.Message}");
             }
         }
 
