@@ -1,28 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SIQServicePackCoreInstaller.VMs
+namespace SIQServicePackCoreInstaller
 {
     public abstract class LogItem : INotifyPropertyChanged {
 
-        private string message;
+        private string _message;
 
         public string Message {
-            get => message;
+            get => _message;
             set {
-                message = value;
-                OnPropertyChanged();
+                _message = value;
+                onPropertyChanged();
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+        protected virtual void onPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }

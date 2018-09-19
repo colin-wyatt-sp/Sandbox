@@ -2,12 +2,11 @@
 using System.IO;
 using System.Linq;
 
-namespace SIQServicePackCoreInstaller
+namespace SIQServicePackCoreInstaller.Model.Utility
 {
-    public static class FileUtility
-    {
+    public static class FileUtility {
 
-        public static void Copy(string sourceDir, string targetDir, IEnumerable<string> fileExcludeList = null, bool overwrite = false) {
+        public static void copy(string sourceDir, string targetDir, IEnumerable<string> fileExcludeList = null, bool overwrite = false) {
 
             Directory.CreateDirectory(targetDir);
 
@@ -20,7 +19,7 @@ namespace SIQServicePackCoreInstaller
             }
 
             foreach (var directory in Directory.GetDirectories(sourceDir))
-                Copy(directory, Path.Combine(targetDir, Path.GetFileName(directory)), fileExcludeList, overwrite);
+                copy(directory, Path.Combine(targetDir, Path.GetFileName(directory)), fileExcludeList, overwrite);
         }
 
     }

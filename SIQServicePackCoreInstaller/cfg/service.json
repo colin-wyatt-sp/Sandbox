@@ -1,3 +1,10 @@
 {
-    "serviceName": "WBXEventManager"
+  "serviceName": "WBXEventManager",
+  "xmlMerge": [
+    {
+      "sourceName": "snippet.config",
+      "destinationName": "RoleAnalyticsServiceHost.exe.config",
+      "textToReplace": "<add key=\"bamUniqueID\""
+    }
+  ]
 }

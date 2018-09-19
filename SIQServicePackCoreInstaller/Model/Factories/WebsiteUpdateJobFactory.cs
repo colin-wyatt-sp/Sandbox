@@ -1,39 +1,34 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.ServiceProcess;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Web.Administration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SIQServicePackCoreInstaller.Interfaces;
+using SIQServicePackCoreInstaller.Model.DataTypes;
+using SIQServicePackCoreInstaller.Model.Jobs;
 
-namespace SIQServicePackCoreInstaller
-{
+namespace SIQServicePackCoreInstaller.Model.Factories {
+
     public class WebsiteUpdateJobFactory : IUpdateJobFactory {
 
-        private readonly string servicePackLocation;
-        private readonly ProcessUtility processUtility;
+        private readonly string _servicePackLocation;
 
-        public WebsiteUpdateJobFactory(string servicePackLocation, ProcessUtility processUtility) {
-            this.servicePackLocation = servicePackLocation;
-            this.processUtility = processUtility;
+        public WebsiteUpdateJobFactory(string servicePackLocation) {
+            this._servicePackLocation = servicePackLocation;
         }
 
         public string Name => "Website";
 
-        public IEnumerable<IUpdateJob> GetJobs() {
+        public IEnumerable<IUpdateJob> getJobs() {
 
-            string[] jsonFiles = Directory.GetFiles(servicePackLocation, "*website.json", SearchOption.AllDirectories);
+            string[] jsonFiles = Directory.GetFiles(_servicePackLocation, "*website.json", SearchOption.AllDirectories);
 
             if (jsonFiles.Length == 0) {
                 return new List<IUpdateJob>();
             }
 
-            Logger.Log("Found the following website config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
+            Logger.log("Found the following website config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
 
             List<WebsiteUpdateJobInfo> websiteJobs = new List<WebsiteUpdateJobInfo>();
             ServerManager server = new ServerManager();
@@ -42,11 +37,11 @@ namespace SIQServicePackCoreInstaller
                 foreach (var jsonFile in jsonFiles) {
                     JObject jsonObject = (JObject) JsonConvert.DeserializeObject(File.ReadAllText(jsonFile));
                     var websiteName = jsonObject["websiteName"].Value<string>();
-                    Logger.Log("Searching for website with name: " + websiteName);
+                    Logger.log("Searching for website with name: " + websiteName);
                     Site site;
-                    string websiteLocation = GetWebAppLocation(websiteName, sites, out site);
+                    string websiteLocation = getWebAppLocation(websiteName, sites, out site);
                     if (string.IsNullOrWhiteSpace(websiteLocation)) {
-                        Logger.Log("Unable to find installed website matching name: " + websiteName + ".  Continuing.");
+                        Logger.log("Unable to find installed website matching name: " + websiteName + ".  Continuing.");
                         continue;
                     }
 
@@ -62,11 +57,13 @@ namespace SIQServicePackCoreInstaller
                     if (!job.ApplicationsDictionary.ContainsKey(websiteName)) {
                         job.ApplicationsDictionary[websiteName] = new DirectoryUpdateJobInfo {
                             LocationToUpdate = websiteLocation,
-                            DirectoryWithFileUpdates = new FileInfo(jsonFile).Directory.FullName
+                            DirectoryWithFileUpdates = new FileInfo(jsonFile).Directory.FullName,
+                            FileExcludeList = new[] { "website.json" },
+                            Name = "WebApp " + websiteName
                         };
                     }
                     else {
-                        Logger.Log(
+                        Logger.log(
                             "ERROR: Logic error in ServicePack installer. Two apps with same name in one website detected.");
                     }
                 }
@@ -77,19 +74,19 @@ namespace SIQServicePackCoreInstaller
             return websiteJobs.Select(x => new WebsiteUpdateJob(x));
         }
 
-        private string GetWebAppLocation(string websiteName, SiteCollection sites, out Site containingSite) {
+        private string getWebAppLocation(string websiteName, SiteCollection sites, out Site containingSite) {
 
             foreach (var site in sites) {
-                Logger.LogToFile("Site: " + site.Name);
+                Logger.logToFile("Site: " + site.Name);
                 foreach (Application app in site.Applications) {
-                    Logger.LogToFile("  App:  poolName: " + app.ApplicationPoolName + ", path: " + app.Path);
+                    Logger.logToFile("  App:  poolName: " + app.ApplicationPoolName + ", path: " + app.Path);
 
                     var appName = app.Path.Trim('/');
                     if (appName != websiteName) continue;
 
                     foreach (VirtualDirectory virtualDir in app.VirtualDirectories)
                     {
-                        Logger.LogToFile("     VirtualDir: physPath: " + virtualDir.PhysicalPath);
+                        Logger.logToFile("     VirtualDir: physPath: " + virtualDir.PhysicalPath);
                         if (virtualDir.PhysicalPath.EndsWith(websiteName)) {
                             containingSite = site;
                             return virtualDir.PhysicalPath;

@@ -1,51 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
-using SIQServicePackCoreInstaller.VMs;
 
 namespace SIQServicePackCoreInstaller
 {
     public static class Logger
     {
-        private static string ThisExeFolderPath;
-        private static string LogFilePath;
-        private static StreamWriter Writer = null;
-        private static string timeStamp;
+        private static string _thisExeFolderPath;
+        private static string _logFilePath;
+        private static StreamWriter _writer;
+        private static string _timeStamp;
 
         public static string Timestamp {
-            get {
-                return timeStamp;
-            }
+            get => _timeStamp;
             set {
-                FlushAndCloseFile();
-                ThisExeFolderPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
-                timeStamp = value;
-                LogFilePath = Path.Combine(ThisExeFolderPath, "output-" + timeStamp + ".txt");
-                Writer = new StreamWriter(LogFilePath);
+                flushAndCloseFile();
+                _thisExeFolderPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
+                _timeStamp = value;
+                _logFilePath = Path.Combine(_thisExeFolderPath, "output-" + _timeStamp + ".txt");
+                _writer = new StreamWriter(_logFilePath);
             }
         }
 
         public static event Action<LogItem> MessageLogged;
 
-        public static void Log(string message, bool writeToFile = true) {
+        public static void log(string message, bool writeToFile = true) {
 
             try
             {
-                var logItem = GetLogItemFrom(message);
+                var logItem = getLogItemFrom(message);
 
                 if (writeToFile)
                 {
-                    Writer.WriteLine(message);
-                    Writer.Flush();
+                    _writer.WriteLine(message);
+                    _writer.Flush();
                 }
 
-                OnMessageLogged(logItem);
+                onMessageLogged(logItem);
             }
             catch (Exception e)
             {
@@ -53,11 +45,11 @@ namespace SIQServicePackCoreInstaller
             }
         }
 
-        public static void LogToFile(string message) {
+        public static void logToFile(string message) {
             try
             {
-                Writer.WriteLine(message);
-                Writer.Flush();
+                _writer.WriteLine(message);
+                _writer.Flush();
             }
             catch (Exception e)
             {
@@ -65,21 +57,21 @@ namespace SIQServicePackCoreInstaller
             }
         }
 
-        private static LogItem GetLogItemFrom(string message) {
+        private static LogItem getLogItemFrom(string message) {
             LogItem logItem = message.StartsWith("ERROR") ? new LogErrorItem {Message = message} :
                 message.StartsWith("WARN") ? new LogWarnItem {Message = message} as LogItem :
                 new LogInfoItem {Message = message};
             return logItem;
         }
 
-        private static void OnMessageLogged(LogItem obj) {
+        private static void onMessageLogged(LogItem obj) {
             MessageLogged?.Invoke(obj);
         }
 
-        private static void FlushAndCloseFile() {
-            if (Writer != null) {
-                Log("Output written to file: " + LogFilePath, writeToFile: false);
-                Writer.Close();
+        private static void flushAndCloseFile() {
+            if (_writer != null) {
+                log("Output written to file: " + _logFilePath, writeToFile: false);
+                _writer.Close();
             }
         }
     }

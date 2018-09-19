@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SIQServicePackCoreInstaller"
-        xmlns:vm="clr-namespace:SIQServicePackCoreInstaller.VMs"
         mc:Ignorable="d"
         Title="SecurityIQ Service Pack Core Installer" 
         Height="400" MinWidth="639" Width="639" MinHeight="200" d:DesignWidth="639"
@@ -27,7 +26,7 @@
                        VerticalAlignment="Top" 
                        Width="142" 
                        HorizontalContentAlignment="Right"/>
-                <Button x:Name="ApplyButton" Content="Apply Service Pack" HorizontalAlignment="Left" Margin="472,51,0,0" VerticalAlignment="Top" Width="145" IsEnabled="False" Click="ApplyButton_Click"/>
+                <Button x:Name="ApplyButton" Content="Apply Service Pack" HorizontalAlignment="Left" Margin="472,51,0,0" VerticalAlignment="Top" Width="145" IsEnabled="False" Click="applyButtonClick"/>
                 <TextBox x:Name="ServicePackLocationTextBox" 
                          HorizontalAlignment="Left" 
                          Height="23"
@@ -37,7 +36,7 @@
                          Width="427" 
                          IsReadOnly="True"
                          Text="{Binding ServicePackLocation}"/>
-                <Button Content="..." HorizontalAlignment="Left" Margin="589,13,0,0" VerticalAlignment="Top" Width="28" RenderTransformOrigin="0.373,0" Height="23" Click="Button_Click"/>
+                <Button Content="..." HorizontalAlignment="Left" Margin="589,13,0,0" VerticalAlignment="Top" Width="28" RenderTransformOrigin="0.373,0" Height="23" Click="buttonClick"/>
             </Grid>
 
             <Border Grid.Row="1" BorderBrush="Blue" BorderThickness="1">
@@ -46,13 +45,13 @@
                               VerticalScrollBarVisibility="Auto" >
                     <ListBox ItemsSource="{Binding Path=LogItems}">
                         <ListBox.Resources>
-                            <DataTemplate DataType="{x:Type vm:LogErrorItem}">
+                            <DataTemplate DataType="{x:Type local:LogErrorItem}">
                                 <TextBlock Foreground="Black" Background="Red" Text="{Binding Message}"></TextBlock>
                             </DataTemplate>
-                            <DataTemplate DataType="{x:Type vm:LogWarnItem}">
+                            <DataTemplate DataType="{x:Type local:LogWarnItem}">
                                 <TextBlock Foreground="Black" Background="DarkOrange" Text="{Binding Message}"></TextBlock>
                             </DataTemplate>
-                            <DataTemplate DataType="{x:Type vm:LogInfoItem}">
+                            <DataTemplate DataType="{x:Type local:LogInfoItem}">
                                 <TextBlock Text="{Binding Message}"></TextBlock>
                             </DataTemplate>
                     </ListBox.Resources>

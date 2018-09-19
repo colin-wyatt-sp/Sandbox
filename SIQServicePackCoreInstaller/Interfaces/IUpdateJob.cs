@@ -1,6 +1,6 @@
-﻿namespace SIQServicePackCoreInstaller {
+﻿namespace SIQServicePackCoreInstaller.Interfaces {
     public interface IUpdateJob {
 
-        void PerformUpdate();
+        void performUpdate();
     }
 }

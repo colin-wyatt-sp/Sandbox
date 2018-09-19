@@ -1,47 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
-using SIQServicePackCoreInstaller.VMs;
 
 namespace SIQServicePackCoreInstaller
 {
     public class ServicePackInstallerViewModel : INotifyPropertyChanged
     {
         //private string logText;
-        private string servicePackLocation;
-        private ObservableCollection<LogItem> logItems = new ObservableCollection<LogItem>();
-        private readonly object lockObject = new object();
+        private string _servicePackLocation;
+        private ObservableCollection<LogItem> _logItems = new ObservableCollection<LogItem>();
+        private readonly object _lockObject = new object();
 
         public ServicePackInstallerViewModel() {
 
-            BindingOperations.EnableCollectionSynchronization(logItems, lockObject);
+            BindingOperations.EnableCollectionSynchronization(_logItems, _lockObject);
         }
 
         public ObservableCollection<LogItem> LogItems {
-            get { return logItems; }
+            get { return _logItems; }
             set {
-                logItems = value;
-                OnPropertyChanged();
+                _logItems = value;
+                onPropertyChanged();
             }
         }
 
         public string ServicePackLocation {
-            get { return servicePackLocation; }
+            get { return _servicePackLocation; }
             set {
-                servicePackLocation = value;
-                OnPropertyChanged();
+                _servicePackLocation = value;
+                onPropertyChanged();
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+        protected virtual void onPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }

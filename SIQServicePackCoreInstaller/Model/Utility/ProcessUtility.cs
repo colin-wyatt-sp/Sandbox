@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SIQServicePackCoreInstaller
-{
-    public class ProcessUtility
-    {
-        public void TryKillRogueProcesses(DirectoryInfo serviceDirectory)
+namespace SIQServicePackCoreInstaller.Model.Utility {
+
+    public static class ProcessUtility {
+
+        public static void tryKillRogueProcesses(DirectoryInfo serviceDirectory)
         {
             //Log("calling GetProcesses...");
             Process[] runningProcesses = Process.GetProcesses();
@@ -42,15 +38,16 @@ namespace SIQServicePackCoreInstaller
 
                     try
                     {
-                        Logger.Log("Killing " + processFileName);
+                        Logger.log("Killing " + processFileName);
                         runningProcess.Kill();
                     }
                     catch (Exception e)
                     {
-                        Logger.Log("ERROR killing service process: " + processFileName + " : " + e.Message);
+                        Logger.log("ERROR killing service process: " + processFileName + " : " + e.Message);
                     }
                 }
             }
         }
+
     }
 }

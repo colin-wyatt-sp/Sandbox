@@ -1,6 +1,7 @@
-﻿using Microsoft.Web.Administration;
+﻿using System.Collections.Generic;
 
-namespace SIQServicePackCoreInstaller {
+namespace SIQServicePackCoreInstaller.Model.DataTypes {
+
     public class DirectoryUpdateJobInfo {
 
         public string Name { get; set; }
@@ -8,6 +9,8 @@ namespace SIQServicePackCoreInstaller {
         public string LocationToUpdate { get; set; }
 
         public string DirectoryWithFileUpdates { get; set; }
+
+        public IEnumerable<string> FileExcludeList { get; set; }
 
     }
 }

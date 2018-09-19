@@ -64,22 +64,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DirectoryUpdateJobInfo.cs" />
-    <Compile Include="FileUtility.cs" />
+    <Compile Include="Model\DataTypes\DirectoryUpdateJobInfo.cs" />
+    <Compile Include="Model\Factories\ClientUpdateJobFactory.cs" />
+    <Compile Include="Model\Jobs\DirectoryUpdateJob.cs" />
+    <Compile Include="Model\Utility\FileUtility.cs" />
     <Compile Include="Interfaces\IUpdateJob.cs" />
     <Compile Include="Interfaces\IUpdateJobFactory.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogItem.cs" />
-    <Compile Include="ProcessUtility.cs" />
-    <Compile Include="RegistryUtility.cs" />
+    <Compile Include="Model\Utility\ProcessUtility.cs" />
+    <Compile Include="Model\Utility\RegistryUtility.cs" />
     <Compile Include="ServicePackInstallerViewModel.cs" />
-    <Compile Include="Service\ServiceUpdateJobFactory.cs" />
-    <Compile Include="Service\ServiceUpdateJob.cs" />
-    <Compile Include="Xml\XmlUpdateJob.cs" />
-    <Compile Include="Website\WebsiteUpdateJob.cs" />
-    <Compile Include="Website\WebsiteUpdateJobInfo.cs" />
-    <Compile Include="Website\WebsiteUpdateJobFactory.cs" />
-    <Compile Include="Xml\XmlUpdateJobFactory.cs" />
+    <Compile Include="Model\Factories\ServiceUpdateJobFactory.cs" />
+    <Compile Include="Model\Jobs\ServiceUpdateJob.cs" />
+    <Compile Include="Model\Jobs\XmlUpdateJob.cs" />
+    <Compile Include="Model\Jobs\WebsiteUpdateJob.cs" />
+    <Compile Include="Model\DataTypes\WebsiteUpdateJobInfo.cs" />
+    <Compile Include="Model\Factories\WebsiteUpdateJobFactory.cs" />
+    <Compile Include="Model\Factories\XmlUpdateJobFactory.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

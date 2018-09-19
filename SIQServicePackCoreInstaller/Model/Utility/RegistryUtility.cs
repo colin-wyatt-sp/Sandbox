@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Win32;
 
-namespace SIQServicePackCoreInstaller
+namespace SIQServicePackCoreInstaller.Model.Utility
 {
-    public static class RegistryUtility
-    {
-        public static string GetServicePath(string serviceName)
-        {
+    public static class RegistryUtility {
+
+        public static string getServicePath(string serviceName) {
 
             string registryPath = @"SYSTEM\CurrentControlSet\Services\" + serviceName;
             RegistryKey keyHKLM = Registry.LocalMachine;

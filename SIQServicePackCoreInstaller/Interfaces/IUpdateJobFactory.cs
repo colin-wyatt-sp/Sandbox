@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace SIQServicePackCoreInstaller {
+namespace SIQServicePackCoreInstaller.Interfaces {
     public interface IUpdateJobFactory {
         
         string Name { get; }
 
-        IEnumerable<IUpdateJob> GetJobs();
+        IEnumerable<IUpdateJob> getJobs();
     }
 }
