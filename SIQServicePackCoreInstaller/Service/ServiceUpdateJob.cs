@@ -1,21 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.ServiceProcess;
 using System.Threading;
 using Microsoft.Win32;
 
 namespace SIQServicePackCoreInstaller {
-    public class UpdateServiceJob : IUpdateJob {
+    public class ServiceUpdateJob : IUpdateJob {
 
         private ServiceController serviceController;
         private DirectoryInfo servicePatchDirectory;
         private ProcessUtility processUtility;
+        private readonly IEnumerable<IUpdateJob> _auxiallaryJobs;
 
-        public UpdateServiceJob(ServiceController serviceController, DirectoryInfo servicePatchDirectory, ProcessUtility processUtility)
+        public ServiceUpdateJob(ServiceController serviceController, DirectoryInfo servicePatchDirectory,
+            ProcessUtility processUtility, IEnumerable<IUpdateJob> auxiallaryJobs)
         {
             this.serviceController = serviceController;
             this.servicePatchDirectory = servicePatchDirectory;
             this.processUtility = processUtility;
+            _auxiallaryJobs = auxiallaryJobs;
         }
 
         public void PerformUpdate() {
@@ -52,7 +56,7 @@ namespace SIQServicePackCoreInstaller {
             }
 
             Logger.Log("Getting service path...");
-            var serviceDirectory = new FileInfo(GetImagePath(serviceController.ServiceName)).Directory;
+            var serviceDirectory = new FileInfo(RegistryUtility.GetServicePath(serviceController.ServiceName)).Directory;
 
             Logger.Log("Stop any service processes still running...");
             processUtility.TryKillRogueProcesses(serviceDirectory);
@@ -66,6 +70,15 @@ namespace SIQServicePackCoreInstaller {
             Logger.Log("Copying service pack files from \"" + servicePackFolder.FullName + "\" to \"" + serviceDirectory.FullName + "\"");
             FileUtility.Copy(servicePackFolder.FullName, serviceDirectory.FullName, new[] { "service.json" }, overwrite: true);
 
+            try {
+                foreach (var auxiallaryJob in _auxiallaryJobs) {
+                    auxiallaryJob.PerformUpdate();
+                }
+            }
+            catch (Exception e) {
+                Logger.Log($"ERROR: executing auxiallary jobs for service {serviceController.DisplayName} : {e.Message}");
+            }
+
             Logger.Log("Starting service " + serviceController.DisplayName + " ...");
             serviceController.Start();
             serviceController.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 3, 0));
@@ -77,22 +90,6 @@ namespace SIQServicePackCoreInstaller {
             {
                 Logger.Log("Completed patching service: " + serviceController.DisplayName);
             }
-        }
-
-
-        private string GetImagePath(string serviceName)
-        {
-
-            string registryPath = @"SYSTEM\CurrentControlSet\Services\" + serviceName;
-            RegistryKey keyHKLM = Registry.LocalMachine;
-
-            RegistryKey key;
-            key = keyHKLM.OpenSubKey(registryPath);
-
-            string value = key.GetValue("ImagePath").ToString();
-            key.Close();
-
-            return Environment.ExpandEnvironmentVariables(value).Replace("\\\"", "").Replace("\"", "");
         }
 
     }

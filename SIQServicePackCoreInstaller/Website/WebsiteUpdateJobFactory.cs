@@ -74,7 +74,7 @@ namespace SIQServicePackCoreInstaller
             finally {
                 server.Dispose();
             }
-            return websiteJobs.Select(x => new UpdateWebsiteJob(x));
+            return websiteJobs.Select(x => new WebsiteUpdateJob(x));
         }
 
         private string GetWebAppLocation(string websiteName, SiteCollection sites, out Site containingSite) {

@@ -13,6 +13,7 @@ using System.Windows.Data;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SIQServicePackCoreInstaller.Properties;
 using SIQServicePackCoreInstaller.VMs;
 using Path = System.IO.Path;
 
@@ -37,6 +38,12 @@ namespace SIQServicePackCoreInstaller
             ViewModel = new ServicePackInstallerViewModel();
             DataContext = ViewModel;
             Logger.MessageLogged += Logger_MessageLogged;
+
+            if (Settings.Default.runFromCurrentDir) {
+                ThisExeFolderPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
+                ViewModel.ServicePackLocation = ThisExeFolderPath;
+                ApplyButton_Click(null, null);
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

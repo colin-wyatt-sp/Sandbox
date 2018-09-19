@@ -5,11 +5,11 @@ using Microsoft.Web.Administration;
 
 namespace SIQServicePackCoreInstaller {
 
-    public class UpdateWebsiteJob : IUpdateJob {
+    public class WebsiteUpdateJob : IUpdateJob {
 
         private WebsiteUpdateJobInfo jobInfo;
 
-        public UpdateWebsiteJob(WebsiteUpdateJobInfo jobInfo) {
+        public WebsiteUpdateJob(WebsiteUpdateJobInfo jobInfo) {
             this.jobInfo = jobInfo;
         }
 

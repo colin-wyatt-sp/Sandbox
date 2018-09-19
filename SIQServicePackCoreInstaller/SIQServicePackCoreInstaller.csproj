@@ -36,6 +36,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -70,12 +71,15 @@
     <Compile Include="Logger.cs" />
     <Compile Include="LogItem.cs" />
     <Compile Include="ProcessUtility.cs" />
+    <Compile Include="RegistryUtility.cs" />
     <Compile Include="ServicePackInstallerViewModel.cs" />
     <Compile Include="Service\ServiceUpdateJobFactory.cs" />
-    <Compile Include="Service\UpdateServiceJob.cs" />
-    <Compile Include="Website\UpdateWebsiteJob.cs" />
+    <Compile Include="Service\ServiceUpdateJob.cs" />
+    <Compile Include="Xml\XmlUpdateJob.cs" />
+    <Compile Include="Website\WebsiteUpdateJob.cs" />
     <Compile Include="Website\WebsiteUpdateJobInfo.cs" />
     <Compile Include="Website\WebsiteUpdateJobFactory.cs" />
+    <Compile Include="Xml\XmlUpdateJobFactory.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
+using SIQServicePackCoreInstaller.Xml;
 
 namespace SIQServicePackCoreInstaller
 {
@@ -29,27 +31,40 @@ namespace SIQServicePackCoreInstaller
             string[] jsonFiles = Directory.GetFiles(servicePackLocation, "*service.json", SearchOption.AllDirectories);
 
             if (jsonFiles.Length == 0) {
-                yield break;
+                return new List<IUpdateJob>();
             }
             Logger.Log("Found the following service config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
 
+            var jobs = new List<IUpdateJob>();
             ServiceController[] services = ServiceController.GetServices();
             foreach (var jsonFile in jsonFiles)
             {
                 JObject jsonObject = (JObject)JsonConvert.DeserializeObject(File.ReadAllText(jsonFile));
+
                 var serviceName = jsonObject["serviceName"].Value<string>();
                 Logger.Log("Searching for service with name: " + serviceName);
-                if (services.All(x => x.ServiceName != serviceName))
+                if (services.All(x => !Regex.Match(x.ServiceName, serviceName).Success))
                 {
+                    // TODO: remove - this is for dev testing only
+                    jobs.AddRange(new XmlUpdateJobFactory(new FileInfo(jsonFile).Directory.FullName, jsonFile).GetJobs());
                     Logger.Log("Unable to find installed service matching name: " + serviceName + ".  Continuing.");
                     continue;
                 }
 
-                var serviceController = services.First(x => x.ServiceName == serviceName);
-                DirectoryInfo servicePatchDirectory = new FileInfo(jsonFile).Directory;
+                var serviceControllers = services.Where(x => Regex.Match(x.ServiceName, serviceName).Success).ToList();
+                foreach (var serviceController in serviceControllers) {
 
-                 yield return new UpdateServiceJob(serviceController, servicePatchDirectory, processUtility);
+                    DirectoryInfo servicePatchDirectory = new FileInfo(jsonFile).Directory;
+                    var auxiallaryJobs =
+                        new XmlUpdateJobFactory(
+                            new FileInfo(RegistryUtility.GetServicePath(serviceController.ServiceName)).Directory
+                                .FullName, jsonFile).GetJobs();
+
+                    jobs.Add(new ServiceUpdateJob(serviceController, servicePatchDirectory, processUtility, auxiallaryJobs));
+                }
             }
+
+            return jobs;
         }
         
     }
