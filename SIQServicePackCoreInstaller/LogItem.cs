@@ -33,4 +33,9 @@ namespace SIQServicePackCoreInstaller
     public class LogErrorItem : LogItem {
 
     }
+
+    public class LogDebugItem : LogItem {
+
+    }
+
 }

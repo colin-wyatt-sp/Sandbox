@@ -41,7 +41,7 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
                     Site site;
                     string websiteLocation = getWebAppLocation(websiteName, sites, out site);
                     if (string.IsNullOrWhiteSpace(websiteLocation)) {
-                        Logger.log("Unable to find installed website matching name: " + websiteName + ".  Continuing.");
+                        Logger.log("INFO: Unable to find installed website matching name: " + websiteName + ".  Continuing.");
                         continue;
                     }
 

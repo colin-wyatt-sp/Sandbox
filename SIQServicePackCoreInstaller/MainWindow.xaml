@@ -9,7 +9,7 @@
         Height="400" MinWidth="639" Width="639" MinHeight="200" d:DesignWidth="639"
         d:DataContext="{d:DesignInstance Type=local:ServicePackInstallerViewModel, IsDesignTimeCreatable=True}"
         >
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="90"></RowDefinition>
@@ -20,14 +20,14 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Row="0"
                   MinHeight="80" Height="81">
-                <Label Content="Service Pack Location:" 
+            <Label Content="Service Pack Location:" 
                        HorizontalAlignment="Left" 
                        Margin="10,10,0,0" 
                        VerticalAlignment="Top" 
                        Width="142" 
                        HorizontalContentAlignment="Right"/>
-                <Button x:Name="ApplyButton" Content="Apply Service Pack" HorizontalAlignment="Left" Margin="472,51,0,0" VerticalAlignment="Top" Width="145" IsEnabled="False" Click="applyButtonClick"/>
-                <TextBox x:Name="ServicePackLocationTextBox" 
+            <Button x:Name="ApplyButton" Content="Apply Service Pack" HorizontalAlignment="Left" Margin="472,51,0,0" VerticalAlignment="Top" Width="145" IsEnabled="False" Click="applyButtonClick"/>
+            <TextBox x:Name="ServicePackLocationTextBox" 
                          HorizontalAlignment="Left" 
                          Height="23"
                          Margin="157,13,0,0" 
@@ -36,30 +36,33 @@
                          Width="427" 
                          IsReadOnly="True"
                          Text="{Binding ServicePackLocation}"/>
-                <Button Content="..." HorizontalAlignment="Left" Margin="589,13,0,0" VerticalAlignment="Top" Width="28" RenderTransformOrigin="0.373,0" Height="23" Click="buttonClick"/>
-            </Grid>
+            <Button Content="..." HorizontalAlignment="Left" Margin="589,13,0,0" VerticalAlignment="Top" Width="28" RenderTransformOrigin="0.373,0" Height="23" Click="buttonClick"/>
+        </Grid>
 
-            <Border Grid.Row="1" BorderBrush="Blue" BorderThickness="1">
-                <ScrollViewer x:Name="scrollViewer"
+        <Border Grid.Row="1" BorderBrush="Blue" BorderThickness="1">
+            <ScrollViewer x:Name="scrollViewer"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto" >
-                    <ListBox ItemsSource="{Binding Path=LogItems}">
-                        <ListBox.Resources>
-                            <DataTemplate DataType="{x:Type local:LogErrorItem}">
-                                <TextBlock Foreground="Black" Background="Red" Text="{Binding Message}"></TextBlock>
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type local:LogWarnItem}">
-                                <TextBlock Foreground="Black" Background="DarkOrange" Text="{Binding Message}"></TextBlock>
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type local:LogInfoItem}">
-                                <TextBlock Text="{Binding Message}"></TextBlock>
-                            </DataTemplate>
+                <ListBox ItemsSource="{Binding Path=LogItems}" >
+                    <ListBox.Resources>
+                        <DataTemplate DataType="{x:Type local:LogErrorItem}">
+                            <TextBlock Foreground="Black" Background="OrangeRed"  Text="{Binding Message}"></TextBlock>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type local:LogWarnItem}">
+                            <TextBlock Foreground="Black" Background="DarkOrange" Text="{Binding Message}"></TextBlock>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type local:LogInfoItem}">
+                            <TextBlock Foreground="Black" Background="LightSteelBlue" Text="{Binding Message}"></TextBlock>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type local:LogDebugItem}">
+                            <TextBlock Text="{Binding Message}"></TextBlock>
+                        </DataTemplate>
                     </ListBox.Resources>
-                    </ListBox>
-                    <!--<TextBlock x:Name="outputTextBlock"
+                </ListBox>
+                <!--<TextBlock x:Name="outputTextBlock"
                                Text="{Binding LogText}"></TextBlock>-->
-                </ScrollViewer>
-            </Border>
+            </ScrollViewer>
+        </Border>
 
 
     </Grid>

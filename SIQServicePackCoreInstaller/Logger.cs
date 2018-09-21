@@ -58,9 +58,16 @@ namespace SIQServicePackCoreInstaller
         }
 
         private static LogItem getLogItemFrom(string message) {
-            LogItem logItem = message.StartsWith("ERROR") ? new LogErrorItem {Message = message} :
-                message.StartsWith("WARN") ? new LogWarnItem {Message = message} as LogItem :
-                new LogInfoItem {Message = message};
+            LogItem logItem;
+            if (message.StartsWith("ERROR"))
+                logItem = new LogErrorItem {Message = message} as LogItem;
+            else if (message.StartsWith("WARN"))
+                logItem = new LogWarnItem {Message = message} as LogItem;
+            else if (message.StartsWith("INFO"))
+                logItem = new LogInfoItem { Message = message } as LogItem;
+            else
+                logItem = new LogDebugItem {Message = message} as LogItem;
+
             return logItem;
         }
 

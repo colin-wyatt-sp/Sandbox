@@ -42,7 +42,7 @@ namespace SIQServicePackCoreInstaller.Model.Factories  {
                 {
                     //// TODO: remove - this is for dev testing only
                     //jobs.AddRange(new XmlUpdateJobFactory(new FileInfo(jsonFile).Directory.FullName, jsonFile).getJobs());
-                    Logger.log("WARN: Unable to find installed service matching name: " + serviceName + ".  Continuing.");
+                    Logger.log("INFO: Unable to find installed service matching name: " + serviceName + ".  Continuing.");
                     continue;
                 }
 
