@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Web.Administration;
@@ -21,14 +22,25 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
         public string Name => "Website";
 
         public IEnumerable<IUpdateJob> getJobs() {
+            try {
+                return performGetJobs();
+            }
+            catch (Exception e) {
+                Logger.log("WARN: Unable to get website update jobs: " + e.Message);
+                return new List<IUpdateJob>();
+            }
+        }
 
+
+        private IEnumerable<IUpdateJob> performGetJobs() {
             string[] jsonFiles = Directory.GetFiles(_servicePackLocation, "*website.json", SearchOption.AllDirectories);
 
             if (jsonFiles.Length == 0) {
                 return new List<IUpdateJob>();
             }
 
-            Logger.logToFile("Found the following website config files: " + string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
+            Logger.logToFile("Found the following website config files: " +
+                             string.Join(", ", jsonFiles.Select(x => new FileInfo(x).Directory.Name)));
 
             List<WebsiteUpdateJobInfo> websiteJobs = new List<WebsiteUpdateJobInfo>();
             ServerManager server = new ServerManager();
@@ -58,7 +70,7 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
                         job.ApplicationsDictionary[websiteName] = new DirectoryUpdateJobInfo {
                             LocationToUpdate = websiteLocation,
                             DirectoryWithFileUpdates = new FileInfo(jsonFile).Directory.FullName,
-                            FileExcludeList = new[] { "website.json" },
+                            FileExcludeList = new[] {"website.json"},
                             Name = "WebApp " + websiteName
                         };
                     }
@@ -71,6 +83,7 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
             finally {
                 server.Dispose();
             }
+
             return websiteJobs.Select(x => new WebsiteUpdateJob(x));
         }
 

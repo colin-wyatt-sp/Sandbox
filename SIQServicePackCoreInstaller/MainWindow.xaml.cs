@@ -102,8 +102,8 @@ namespace SIQServicePackCoreInstaller {
         private IEnumerable<IUpdateJobFactory> getUpdateFactories() {
 
             yield return new ServiceUpdateJobFactory(_viewModel.ServicePackLocation);
-            yield return new WebsiteUpdateJobFactory(_viewModel.ServicePackLocation);
             yield return new ClientUpdateJobFactory(_viewModel.ServicePackLocation);
+            yield return new WebsiteUpdateJobFactory(_viewModel.ServicePackLocation);
         }
 
         private void initializeLogger() {
