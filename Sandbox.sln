@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticSearchIndexer", "Ela
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagnoseExchangeTool", "DiagnoseExchangeTool\DiagnoseExchangeTool.csproj", "{2B0923F0-3029-44AC-8573-E2369F479F7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessLogFiles", "ProcessLogFiles\ProcessLogFiles.csproj", "{43425AE9-ED3D-4D7B-9953-EA53C5B41757}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2B0923F0-3029-44AC-8573-E2369F479F7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B0923F0-3029-44AC-8573-E2369F479F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B0923F0-3029-44AC-8573-E2369F479F7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43425AE9-ED3D-4D7B-9953-EA53C5B41757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43425AE9-ED3D-4D7B-9953-EA53C5B41757}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43425AE9-ED3D-4D7B-9953-EA53C5B41757}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43425AE9-ED3D-4D7B-9953-EA53C5B41757}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

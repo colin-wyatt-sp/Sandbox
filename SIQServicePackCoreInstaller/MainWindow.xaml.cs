@@ -19,7 +19,6 @@ namespace SIQServicePackCoreInstaller {
 
         private DateTime _currentDateTime;
         private string _timeStamp;
-        private string _thisExeFolderPath;
         private readonly ServicePackInstallerViewModel _viewModel;
 
         public MainWindow()
@@ -30,8 +29,7 @@ namespace SIQServicePackCoreInstaller {
             Logger.MessageLogged += loggerMessageLogged;
 
             if (Settings.Default.runFromCurrentDir) {
-                _thisExeFolderPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
-                _viewModel.ServicePackLocation = _thisExeFolderPath;
+                _viewModel.ServicePackLocation = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
                 applyButtonClick(null, null);
             }
         }
@@ -40,8 +38,14 @@ namespace SIQServicePackCoreInstaller {
         {
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog()) {
 
-                _thisExeFolderPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
-                dialog.SelectedPath = _thisExeFolderPath;
+                string toolFolderPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
+                try {
+                    dialog.SelectedPath = new DirectoryInfo(toolFolderPath).Parent.FullName;
+                }
+                catch {
+                    dialog.SelectedPath = toolFolderPath;
+                }
+
                 System.Windows.Forms.DialogResult result = dialog.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK
                     || result == System.Windows.Forms.DialogResult.Yes) {

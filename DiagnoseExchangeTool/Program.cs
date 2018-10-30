@@ -64,7 +64,9 @@ namespace DiagnoseExchangeTool
 
             }
 
-            var scriptName = RunExchangePowershell(isExchangeOnline);
+            int scriptNumber = processScriptNumber();
+
+            var scriptName = RunExchangePowershell(isExchangeOnline, scriptNumber);
 
             if (ConfigurationManager.AppSettings["deleteScriptOnExit"] == "true") {
                 File.Delete(".\\" + scriptName);
@@ -73,6 +75,16 @@ namespace DiagnoseExchangeTool
             writeOutputAndCleanup();
 
             return;
+        }
+
+        private static int processScriptNumber() 
+        {
+            if (string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["scriptNumber"]))
+                return 1;
+
+            string scriptNumberStr = ConfigurationManager.AppSettings["scriptNumber"];
+            int scriptNum;
+            return Int32.TryParse(scriptNumberStr, out scriptNum) ? scriptNum : 1;
         }
 
         private static void processIsExchangeOnlineParameter()
@@ -191,12 +203,12 @@ namespace DiagnoseExchangeTool
                    || boolStr.Trim().ToLowerInvariant().StartsWith("t");
         }
 
-        private static string RunExchangePowershell(bool isExchangeOnline) {
+        private static string RunExchangePowershell(bool isExchangeOnline, int scriptNumber) {
 
             var currentDateTime = DateTime.Now;
             var timeStamp = currentDateTime.ToString("yyyyMMddHHmmss");
 
-            var scriptName = "DiagnoseExchangeTool.iterateMailboxes.ps1";
+            var scriptName = $"DiagnoseExchangeTool.iterateMailboxes{scriptNumber}.ps1";
             string scriptContents = string.Empty;
 
             using (Stream stream = assembly.GetManifestResourceStream(scriptName))
