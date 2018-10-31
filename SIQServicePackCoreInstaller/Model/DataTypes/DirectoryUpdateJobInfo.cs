@@ -12,5 +12,7 @@ namespace SIQServicePackCoreInstaller.Model.DataTypes {
 
         public IEnumerable<string> FileExcludeList { get; set; }
 
+        public bool CreateBackupAsZip { get; set; }
+
     }
 }

@@ -71,7 +71,8 @@ namespace SIQServicePackCoreInstaller.Model.Factories {
                             LocationToUpdate = websiteLocation,
                             DirectoryWithFileUpdates = new FileInfo(jsonFile).Directory.FullName,
                             FileExcludeList = new[] {"website.json"},
-                            Name = "WebApp " + websiteName
+                            Name = "WebApp " + websiteName,
+                            CreateBackupAsZip = true // create backup as zip so IIS doesn't complain about access
                         };
                     }
                     else {
