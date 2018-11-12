@@ -57,6 +57,8 @@
     </None>
     <EmbeddedResource Include="iterateMailboxes1.ps1" />
     <EmbeddedResource Include="iterateMailboxes2.ps1" />
+    <EmbeddedResource Include="iterateMailboxes3.ps1" />
+    <EmbeddedResource Include="iterateMailboxes4.ps1" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

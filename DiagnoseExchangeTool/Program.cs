@@ -121,16 +121,17 @@ namespace DiagnoseExchangeTool
             if (string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["password"]))
             {
                 Console.WriteLine("Enter Password:");
-                password = null;
-                while (true)
-                {
-                    var key = Console.ReadKey(true);
-                    if (key.Key == ConsoleKey.Enter)
-                        break;
-                    password += key.KeyChar;
-                }
+                password = Console.ReadLine();
+                //password = null;
+                //while (true)
+                //{
+                //    var key = Console.ReadKey(true);
+                //    if (key.Key == ConsoleKey.Enter)
+                //        break;
+                //    password += key.KeyChar;
+                //}
 
-                Console.WriteLine();
+                //Console.WriteLine();
             }
             else
             {

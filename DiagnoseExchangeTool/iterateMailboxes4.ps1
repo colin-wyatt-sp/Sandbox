@@ -45,19 +45,26 @@ if ($s -ne $null) {
 	Set-ExecutionPolicy -ExecutionPolicy ByPass -Scope Process -Force
 }
 "--------------------------------------------"
-"Getting public folders only"
-"--------------------------------------------"
-Get-PublicFolder -Identity '\' -GetChildren -ResultSize Unlimited | Select-Object Identity,EntryId
-
-"--------------------------------------------"
-"Getting public folders and children"
+"Getting public folders"
 "--------------------------------------------"
 Get-PublicFolder -Identity '\' -GetChildren -ResultSize Unlimited | Select-Object Identity,EntryId | Foreach-Object {
 "Testing public folder $($_.Identity), $($_.EntryId)  -- getting children at this level"
 Get-PublicFolder -Identity $($_.EntryId) -GetChildren -ResultSize Unlimited | Select-Object Name,EntryId
 }
+"--------------------------------------------"
+"Getting mailboxes and statistics"
+"--------------------------------------------"
+Get-Mailbox -ResultSize Unlimited | Select-Object ExchangeGuid,DistinguishedName,UserPrincipalName,DisplayName
+""
+"               Account Name    email        mailbox version"
+"---------------------------- -------------- ---------------"
+#get-mailbox | select name,primarysmtpaddress,exchangeversion | Format-Table -GroupBy ExchangeVersion
+get-mailbox -ResultSize Unlimited | select name,primarysmtpaddress,exchangeversion | Foreach-Object {
+"Testing mailbox $($_.name), $($_.primarysmtpaddress), $($_.ExchangeVersion)"
+Get-MailboxFolderStatistics -Identity $($_.primarysmtpaddress) | Select-Object Identity
+}
 
-"Finished checking mailbox folders on $serverName"
+"Finished checking mailbox statistics on $serverName"
 
 
 
