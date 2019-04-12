@@ -18,6 +18,7 @@ namespace DiagnoseExchangeTool
         private static string OutPath;
 
         static bool isSsl;
+        static bool hideTypedPassword;
         static string netbios = string.Empty;
         static string serverName;
         static string userName;
@@ -118,26 +119,48 @@ namespace DiagnoseExchangeTool
 
         private static void processPasswordParameter()
         {
+            processShouldTypeObfuscatedPasswordParameter();
+
             if (string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["password"]))
             {
                 Console.WriteLine("Enter Password:");
-                password = Console.ReadLine();
-                //password = null;
-                //while (true)
-                //{
-                //    var key = Console.ReadKey(true);
-                //    if (key.Key == ConsoleKey.Enter)
-                //        break;
-                //    password += key.KeyChar;
-                //}
-
-                //Console.WriteLine();
+                if (hideTypedPassword) {
+                    password = null;
+                    while (true)
+                    {
+                        var key = Console.ReadKey(true);
+                        if (key.Key == ConsoleKey.Enter)
+                            break;
+                        password += key.KeyChar;
+                    }
+                    Console.WriteLine();
+                }
+                else {
+                    password = Console.ReadLine();
+                }
             }
             else
             {
                 password = ConfigurationManager.AppSettings["password"];
             }
         }
+
+        private static void processShouldTypeObfuscatedPasswordParameter()
+        {
+            string hideTypedPasswordStr;
+            if (string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["hideTypedPassword"]))
+            {
+                Console.WriteLine("Hide typed password?");
+                hideTypedPasswordStr = Console.ReadLine();
+            }
+            else
+            {
+                hideTypedPasswordStr = ConfigurationManager.AppSettings["hideTypedPassword"];
+            }
+
+            hideTypedPassword = getBoolFrom(hideTypedPasswordStr);
+        }
+
         private static void processServerNameParameter()
         {
             if (string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["serverName"]))

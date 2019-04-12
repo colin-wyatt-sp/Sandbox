@@ -3,8 +3,8 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 
-namespace SIQServicePackCoreInstaller
-{
+namespace ADTester {
+
     public static class Logger
     {
         private static string _thisExeFolderPath;

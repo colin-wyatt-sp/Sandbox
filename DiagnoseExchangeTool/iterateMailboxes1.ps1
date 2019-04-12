@@ -51,7 +51,7 @@ if ($s -ne $null) {
 #get-mailbox | select name,primarysmtpaddress,exchangeversion | Format-Table -GroupBy ExchangeVersion
 get-mailbox -ResultSize Unlimited | select name,primarysmtpaddress,exchangeversion | SORT-Object -Property ExchanageVersion -Descending | Foreach-Object {
 "Testing mailbox $($_.name), $($_.primarysmtpaddress), $($_.ExchangeVersion)"
-Search-MailboxAuditLog -Identity $($_.primarysmtpaddress) -ShowDetails -ResultSize 1 -StartDate ('2018-01-19T15:53:25Z') -EndDate ('2018-09-27T00:00:00Z')
+Search-MailboxAuditLog -Identity $($_.primarysmtpaddress) -ShowDetails -ResultSize 1 -StartDate ('2018-11-12T15:53:25Z') -EndDate ('2018-11-14T13:08:00Z')
 }
 
 "Finished checking mailbox searches on $serverName"

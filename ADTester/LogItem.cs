@@ -1,8 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace SIQServicePackCoreInstaller
-{
+namespace ADTester {
     public abstract class LogItem : INotifyPropertyChanged {
 
         private string _message;
@@ -37,5 +36,4 @@ namespace SIQServicePackCoreInstaller
     public class LogDebugItem : LogItem {
 
     }
-
 }
