@@ -65,6 +65,13 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ArbitraryFunction.cs" />
+    <None Include="cfg\Get Forest DN">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Compile Include="Enumerations.cs" />
+    <Compile Include="Interfaces\IActionResult.cs" />
+    <Compile Include="Interfaces\IArbitraryAction.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogItem.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -73,6 +80,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\Data\ArbitraryAction.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -99,5 +107,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

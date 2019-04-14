@@ -1,0 +1,49 @@
+<Query Kind="Program">
+  <Reference>&lt;RuntimeDirectory&gt;\System.DirectoryServices.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\System.Configuration.dll</Reference>
+  <Namespace>System.DirectoryServices</Namespace>
+</Query>
+
+void Main()
+{
+	string domain = "famsus";
+	string specificServer = "";//"altair-dc2.famsus.forest";
+	string ldapBaseAddr = !string.IsNullOrWhiteSpace(specificServer) ? specificServer : domain;
+	
+	bool isSsl = false;
+	int port = isSsl ? 636 : 389;
+	
+	string userName = "administrator";
+	string password = "over boord 1!";
+	
+	string ldapPath = string.Format("LDAP://{0}:{1}/RootDSE", ldapBaseAddr, port);
+	
+	AuthenticationTypes authType = AuthenticationTypes.Secure;
+	if (isSsl)
+		authType |= AuthenticationTypes.SecureSocketsLayer;
+	if (!string.IsNullOrWhiteSpace(specificServer))
+		authType |= AuthenticationTypes.ServerBind;
+
+	DirectoryEntry directoryEntry = new DirectoryEntry(ldapPath, userName, password, authType);
+	
+	using (directoryEntry)
+	{
+		foreach (var prop in directoryEntry.Properties)
+		{
+		    if (prop is PropertyValueCollection) {
+				
+				var propValCollection = prop as PropertyValueCollection;
+				Console.WriteLine(propValCollection.PropertyName + ":");
+				foreach (var element in propValCollection) 
+				{
+					Console.WriteLine($"   {element} ");
+				}
+			}
+			else {
+				Console.WriteLine("prop type: " + prop.GetType().Name);
+			}
+		}
+		//string forestDN = directoryEntry.Properties["rootDomainNamingContext"].Value as string;
+		//Console.WriteLine("Connected to forest DN={0}", forestDN);
+	}
+}

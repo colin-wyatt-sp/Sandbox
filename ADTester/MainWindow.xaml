@@ -6,25 +6,91 @@
         xmlns:local="clr-namespace:ADTester"
         mc:Ignorable="d"
         Title="Active Directory Connectivity Tester" 
-        Height="400" MinWidth="639" Width="639" MinHeight="200" d:DesignWidth="639"
+        Height="400" MinWidth="450" Width="450" MinHeight="200" d:DesignWidth="450"
         d:DataContext="{d:DesignInstance Type=local:ActiveDirectoryTesterViewModel, IsDesignTimeCreatable=True}"
+        
         >
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="90"></RowDefinition>
+            <RowDefinition Height="60"></RowDefinition>
+            <RowDefinition Height="130"></RowDefinition>
+            <RowDefinition Height="115"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Border Grid.Row="0" BorderBrush="DarkBlue" BorderThickness="2">
-            <Grid MinHeight="80" Height="81">
-                <Label>label1</Label>
-                <Label>label2</Label>
+
+        <Border Name="adConfigBorder"  Grid.Row="0" BorderBrush="DarkOrange" BorderThickness="2" Grid.ColumnSpan="4">
+            <StackPanel Orientation="Horizontal" Margin="3,3,0,2">
+                <StackPanel Orientation="Vertical">
+                    <RadioButton Name="domainRadioButton" GroupName="domain" IsChecked="True">
+                        <StackPanel Orientation="Horizontal">
+                            <Label>Domain</Label>
+                            <TextBox Name="domainTextBox" Text="{Binding Domain}" MinWidth="83" Margin="2,2,2,2"></TextBox>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Name="specificServerRadioButton" GroupName="domain">
+                        <StackPanel Orientation="Horizontal">
+                            <Label>Specific Server</Label>
+                            <TextBox Name="specificServerTextBox" Text="{Binding SpecificServer}" MinWidth="50" Margin="2,2,1,2"></TextBox>
+                        </StackPanel>
+                    </RadioButton>
+                </StackPanel>
+                <Grid MinWidth="272" Margin="8,0,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="26"></RowDefinition>
+                        <RowDefinition Height="26"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <Label>User Name:</Label>
+                        <TextBox Margin="2,3,3,3" Name="userNameTextBox" Text="{Binding UserName}" MinWidth="70"></TextBox>
+                        <Label>Password:</Label>
+                        <PasswordBox  Margin="2,3,3,3" Name="passwordBox" PasswordChar="*" MinWidth="50"></PasswordBox>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0">
+                        <CheckBox Name="isSslCheckbox" Content="SSL" Margin="10,2,2,2"></CheckBox>
+                    </StackPanel>
+                </Grid>
+                
+            </StackPanel>
+        </Border>
+        <Border Grid.Row="1" BorderBrush="CadetBlue" BorderThickness="2" Grid.ColumnSpan="4">
+
+            <Grid Name="controlsAndCodeGrid" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" 
+                    Name="controlsGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="22"></RowDefinition>
+                        <RowDefinition Height="100"></RowDefinition>
+                        <RowDefinition Height="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ListBox Grid.Row="0"
+                        ItemsSource="{Binding ActionList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsEnabled}" Content="{Binding Description}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+
+                <TextBox Name="codeTextBlock" Grid.Column="1" Text="{Binding Code}" IsReadOnly="False">
+                    
+                </TextBox>
+
             </Grid>
+            
+
         </Border>
 
-        <Border Grid.Row="1" BorderBrush="Goldenrod" BorderThickness="2">
+        <Border Name="logBorder" Grid.Row="2" BorderBrush="Goldenrod" BorderThickness="2" Grid.ColumnSpan="4">
             <ScrollViewer x:Name="scrollViewer"
                           HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto" >
@@ -44,8 +110,16 @@
                         </DataTemplate>
                     </ListBox.Resources>
                 </ListBox>
-                <!--<TextBlock x:Name="outputTextBlock"
-                               Text="{Binding LogText}"></TextBlock>-->
+
+            </ScrollViewer>
+        </Border>
+
+        <Border Name="outputBrder" Grid.Row="3" BorderBrush="Black" BorderThickness="2" Grid.ColumnSpan="4">
+            <ScrollViewer x:Name="outputScrollViewer"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto" >
+
+            <TextBlock Name="outputTextBlock" Text="{Binding OutputText}"></TextBlock>
             </ScrollViewer>
         </Border>
 
