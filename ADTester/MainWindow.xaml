@@ -13,7 +13,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="130"></RowDefinition>
+            <RowDefinition Height="147"></RowDefinition>
             <RowDefinition Height="115"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
@@ -41,12 +41,12 @@
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal">
                         <Label>User Name:</Label>
-                        <TextBox Margin="2,3,3,3" Name="userNameTextBox" Text="{Binding UserName}" MinWidth="70"></TextBox>
+                        <TextBox Margin="2,3,3,3" Name="userNameTextBox" Text="{Binding Username}" MinWidth="70"></TextBox>
                         <Label>Password:</Label>
                         <PasswordBox  Margin="2,3,3,3" Name="passwordBox" PasswordChar="*" MinWidth="50"></PasswordBox>
                     </StackPanel>
                     <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0">
-                        <CheckBox Name="isSslCheckbox" Content="SSL" Margin="10,2,2,2"></CheckBox>
+                        <CheckBox Name="isSslCheckbox" Content="SSL" Margin="10,2,2,2" IsChecked="True"></CheckBox>
                     </StackPanel>
                 </Grid>
                 
@@ -63,27 +63,31 @@
                 <Grid Grid.Column="0" 
                     Name="controlsGrid">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="22"></RowDefinition>
-                        <RowDefinition Height="100"></RowDefinition>
+                        <RowDefinition Height="25"></RowDefinition>
+                        <RowDefinition Height="80"></RowDefinition>
                         <RowDefinition Height="30"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <ListBox Grid.Row="0"
-                        ItemsSource="{Binding ActionList}">
+                   
+                    <CheckBox Name="toggleAllCheckbox" Content="Check/Uncheck All" Checked="ToggleAllCheckbox_Checked" Margin="5,5,5,5"></CheckBox>
+                    <ListBox Name="actionListBox" Grid.Row="1" Margin="4,3,2,2" SelectionMode="Single"
+                        ItemsSource="{Binding ActionList}" SelectionChanged="Selector_OnSelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <CheckBox IsChecked="{Binding IsEnabled}" Content="{Binding Description}"/>
+                                <CheckBox IsChecked="{Binding IsEnabled}" Content="{Binding Description}" Margin="2,2,2,2" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+                    <StackPanel Orientation="Horizontal" Margin="80,3,3,0" Grid.Row="2">
+                        <Button Name="clearButton" Content="Clear" Margin="0,0,17,0" Padding="13,2,13,2"></Button>
+                        <Button Name="runButton" Content="Run" Height="28" Padding="15,2,15,2" Click="RunButton_OnClick"/>
+                    </StackPanel>
                 </Grid>
 
-                <TextBox Name="codeTextBlock" Grid.Column="1" Text="{Binding Code}" IsReadOnly="False">
-                    
-                </TextBox>
+                <ScrollViewer x:Name="codeScrollViewer" Grid.Column="1"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto" >
+                    <TextBox Name="codeTextBlock"  Text="{Binding Code}" IsReadOnly="False" />
+                </ScrollViewer>
 
             </Grid>
             
@@ -97,16 +101,16 @@
                 <ListBox ItemsSource="{Binding Path=LogItems}" >
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type local:LogErrorItem}">
-                            <TextBlock Foreground="Black" Background="OrangeRed"  Text="{Binding Message}"></TextBlock>
+                            <TextBox MaxLines="1" TextWrapping="NoWrap" Foreground="Black" Background="OrangeRed"  Text="{Binding Message}"></TextBox>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type local:LogWarnItem}">
-                            <TextBlock Foreground="Black" Background="DarkOrange" Text="{Binding Message}"></TextBlock>
+                            <TextBox MaxLines="1" TextWrapping="NoWrap" Foreground="Black" Background="DarkOrange" Text="{Binding Message}"></TextBox>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type local:LogInfoItem}">
-                            <TextBlock Foreground="Black" Background="LightSteelBlue" Text="{Binding Message}"></TextBlock>
+                            <TextBox MaxLines="1" TextWrapping="NoWrap" Foreground="Black" Background="LightSteelBlue" Text="{Binding Message}"></TextBox>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type local:LogDebugItem}">
-                            <TextBlock Text="{Binding Message}"></TextBlock>
+                            <TextBox BorderThickness="0" MaxLines="1" TextWrapping="NoWrap" Text="{Binding Message}"></TextBox>
                         </DataTemplate>
                     </ListBox.Resources>
                 </ListBox>

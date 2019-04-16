@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using ADTester.Interfaces;
 
 namespace ADTester {
 
@@ -25,7 +26,7 @@ namespace ADTester {
 
         public static event Action<LogItem> MessageLogged;
 
-        public static void log(string message, bool writeToFile = true) {
+        public static void log(string message, bool writeToFile = false) {
 
             try
             {
@@ -45,6 +46,32 @@ namespace ADTester {
             }
         }
 
+        public static void log(IActionResult actionResult)
+        {
+            try
+            {
+                LogItem logItem = getLogItemFrom(actionResult.ResturnStatus);
+                logItem.ActionResult = actionResult;
+                logItem.Message = actionResult.Description + " => " + actionResult.Output;
+                onMessageLogged(logItem);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("There was a problem logging: " + e.Message + ", LOG Message: " + actionResult);
+            }
+        }
+
+        private static LogItem getLogItemFrom(ActionReturnStatus status)
+        {
+            LogItem logItem;
+            if (status == ActionReturnStatus.ErrorDetected)
+                logItem = new LogErrorItem() as LogItem;
+            else
+                logItem = new LogDebugItem() as LogItem;
+
+            return logItem;
+        }
+
         public static void logToFile(string message) {
             try
             {
@@ -60,11 +87,11 @@ namespace ADTester {
         private static LogItem getLogItemFrom(string message) {
             LogItem logItem;
             if (message.StartsWith("ERROR"))
-                logItem = new LogErrorItem {Message = message} as LogItem;
+                logItem = new LogErrorItem {Message = message.Substring(5).Trim(' ') } as LogItem;
             else if (message.StartsWith("WARN"))
-                logItem = new LogWarnItem {Message = message} as LogItem;
+                logItem = new LogWarnItem {Message = message.Substring(4).Trim(' ') } as LogItem;
             else if (message.StartsWith("INFO"))
-                logItem = new LogInfoItem { Message = message } as LogItem;
+                logItem = new LogInfoItem { Message = message.Substring(4).Trim(' ') } as LogItem;
             else
                 logItem = new LogDebugItem {Message = message} as LogItem;
 
@@ -81,5 +108,7 @@ namespace ADTester {
                 _writer.Close();
             }
         }
+
+        
     }
 }
