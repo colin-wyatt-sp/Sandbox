@@ -34,11 +34,11 @@ namespace ADTester
             Logger.MessageLogged += loggerMessageLogged;
 
             //TODO: rem
-            _viewModel.Domain = "siqsus.forest";
-            _viewModel.DomainNetbios = "siqsus";
-            _viewModel.SpecificServer = string.Empty;
-            _viewModel.Username = "Administrator";
-            passwordBox.Password = "over boord 1!";
+            //_viewModel.Domain = "siqsus.forest";
+            //_viewModel.DomainNetbios = "siqsus";
+            //_viewModel.SpecificServer = string.Empty;
+            //_viewModel.Username = "Administrator";
+            //passwordBox.Password = "over boord 1!";
         }
 
         private void initializeLogger() {
