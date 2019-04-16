@@ -1,5 +1,5 @@
 int port = isSsl ? 636 : 389;
-string ldapBaseAddr = !string.IsNullOrWhiteSpace(specificServer) ? specificServer : domain;
+string ldapBaseAddr = !string.IsNullOrWhiteSpace(specificServer) ? specificServer : domainNetbios;
 string ldapPath = string.Format("LDAP://{0}:{1}/RootDSE", ldapBaseAddr, port);
 sb.AppendLine(ldapPath);
 AuthenticationTypes authType = AuthenticationTypes.Secure;
@@ -12,19 +12,6 @@ DirectoryEntry directoryEntry = new DirectoryEntry(ldapPath, username, password,
 
 using (directoryEntry)
 {
-	foreach (var prop in directoryEntry.Properties)
-	{
-		if (prop is PropertyValueCollection) {
-			
-			var propValCollection = prop as PropertyValueCollection;
-			sb.AppendLine(propValCollection.PropertyName + ":");
-			foreach (var element in propValCollection) 
-			{
-				sb.AppendLine("   " + element +" ");
-			}
-		}
-		else {
-			sb.AppendLine("prop type: " + prop.GetType().Name);
-		}
-	}
+    string forestDN = directoryEntry.Properties["rootDomainNamingContext"].Value as string;
+    sb.AppendLine("forestDN = " + forestDN);
 }

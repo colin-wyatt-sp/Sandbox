@@ -80,7 +80,8 @@ namespace ADTester
             ArbitraryActiveDirectoryAction action = arbitraryAction as ArbitraryActiveDirectoryAction;
             if (action == null) return;
 
-            action.setParameters(domainRadioButton.IsChecked.Value ? domainTextBox.Text : string.Empty, 
+            action.setParameters(_viewModel.Domain, 
+                _viewModel.DomainNetbios,
                 specificServerRadioButton.IsChecked.Value ? specificServerTextBox.Text : string.Empty, 
                 userNameTextBox.Text, 
                 passwordBox.Password, 

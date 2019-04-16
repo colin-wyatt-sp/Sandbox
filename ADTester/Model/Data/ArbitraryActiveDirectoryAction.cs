@@ -1,6 +1,5 @@
 ﻿using System;
 using System.CodeDom.Compiler;
-using System.DirectoryServices;
 using System.Reflection;
 using System.Text;
 using System.Windows;
@@ -20,14 +19,17 @@ namespace ADTester.Model.Data
             
         }
 
-        public void setParameters(string domain, string specificServer, string username, string password, bool isSsl)
+        public void setParameters(string domain, string domainNetbios, string specificServer, string username, string password, bool isSsl)
         {
             Domain = domain;
+            DomainNetbios = domainNetbios;
             SpecificServer = specificServer;
             Username = username;
             Password = password;
             IsSsl = isSsl;
         }
+
+        public string DomainNetbios { get; set; }
 
         public string Description { get; }
 
@@ -42,7 +44,7 @@ namespace ADTester.Model.Data
             Exception exception = null;
             try
             {
-                output = (string) methodInfo.Invoke(null, new object[] {Domain, SpecificServer, Username, Password, IsSsl});
+                output = (string) methodInfo.Invoke(null, new object[] {Domain, DomainNetbios, SpecificServer, Username, Password, IsSsl});
             }
             catch (Exception e)
             {
@@ -61,12 +63,13 @@ namespace ADTester.Model.Data
         using System.Text;
         using System.DirectoryServices;
         using System.Text.RegularExpressions;
+        using System.ServiceModel;
             
         namespace Foo
         {                
             public static class Bar
             {                
-                public static string Function(string domain, string specificServer, string username, string password, bool isSsl)
+                public static string Function(string domain, string domainNetbios, string specificServer, string username, string password, bool isSsl)
                 {
                     StringBuilder sb = new StringBuilder();
                     body_text;
@@ -85,6 +88,7 @@ namespace ADTester.Model.Data
             parameters.ReferencedAssemblies.Add("System.DirectoryServices.dll");
             parameters.ReferencedAssemblies.Add("System.Configuration.dll");
             parameters.ReferencedAssemblies.Add("System.Text.RegularExpressions.dll");
+            parameters.ReferencedAssemblies.Add("System.ServiceModel.dll");
             // True - memory generation, false - external file generation
             parameters.GenerateInMemory = true;
             // True - exe file generation, false - dll file generation

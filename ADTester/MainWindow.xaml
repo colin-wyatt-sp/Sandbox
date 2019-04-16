@@ -39,14 +39,16 @@
                         <RowDefinition Height="26"></RowDefinition>
                         <RowDefinition Height="26"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,0">
+                        <Label>NETBIOS:</Label>
+                        <TextBox Margin="2,3,3,3" Name="netbiosTextBox" Text="{Binding DomainNetbios}" MinWidth="70"></TextBox>
+                        <CheckBox Name="isSslCheckbox" Content="SSL" Margin="10,2,2,2" IsChecked="True"></CheckBox>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
                         <Label>User Name:</Label>
                         <TextBox Margin="2,3,3,3" Name="userNameTextBox" Text="{Binding Username}" MinWidth="70"></TextBox>
                         <Label>Password:</Label>
                         <PasswordBox  Margin="2,3,3,3" Name="passwordBox" PasswordChar="*" MinWidth="50"></PasswordBox>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0">
-                        <CheckBox Name="isSslCheckbox" Content="SSL" Margin="10,2,2,2" IsChecked="True"></CheckBox>
                     </StackPanel>
                 </Grid>
                 

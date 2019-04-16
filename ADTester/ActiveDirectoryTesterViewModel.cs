@@ -20,6 +20,7 @@ namespace ADTester {
         private string _domain;
         private string _specificServer;
         private string _username;
+        private string _domainNetbios;
 
         public ActiveDirectoryTesterViewModel() {
             BindingOperations.EnableCollectionSynchronization(_logItems, _lockObject);
@@ -35,7 +36,8 @@ namespace ADTester {
 
             
             //TODO: rem
-            Domain = "siqsus";
+            Domain = "siqsus.forest";
+            DomainNetbios = "siqsus";
             SpecificServer = string.Empty;
             Username = "Administrator";
         }
@@ -110,6 +112,16 @@ namespace ADTester {
             set
             {
                 _code = value;
+                onPropertyChanged();
+            }
+        }
+
+        public string DomainNetbios
+        {
+            get => _domainNetbios;
+            set
+            {
+                _domainNetbios = value; 
                 onPropertyChanged();
             }
         }
