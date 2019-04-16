@@ -23,12 +23,14 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="147"></RowDefinition>
-            <RowDefinition Height="115"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="5"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="5"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Border Name="adConfigBorder"  Grid.Row="0" BorderBrush="DarkOrange" BorderThickness="2" Grid.ColumnSpan="4">
+        <Border Name="adConfigBorder"  Grid.Row="0" BorderBrush="DarkGoldenrod" BorderThickness="2"   Grid.ColumnSpan="4">
             <StackPanel Orientation="Horizontal" Margin="3,3,0,2">
                 <StackPanel Orientation="Vertical">
                     <RadioButton Name="domainRadioButton" GroupName="domain" IsChecked="True">
@@ -64,7 +66,7 @@
                 
             </StackPanel>
         </Border>
-        <Border Grid.Row="1" BorderBrush="CadetBlue" BorderThickness="2" Grid.ColumnSpan="4">
+        <Border Grid.Row="1" BorderBrush="CadetBlue" BorderThickness="2,0,2,0" Grid.ColumnSpan="4">
 
             <Grid Name="controlsAndCodeGrid" >
                 <Grid.ColumnDefinitions>
@@ -76,7 +78,7 @@
                     Name="controlsGrid">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="25"></RowDefinition>
-                        <RowDefinition Height="80"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
                         <RowDefinition Height="30"></RowDefinition>
                     </Grid.RowDefinitions>
                    
@@ -114,7 +116,9 @@
 
         </Border>
 
-        <Border Name="logBorder" Grid.Row="2" BorderBrush="Goldenrod" BorderThickness="2" Grid.ColumnSpan="4">
+        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" />
+
+        <Border Name="logBorder" Grid.Row="3" BorderBrush="Navy" BorderThickness="2" Grid.ColumnSpan="4">
             <ScrollViewer x:Name="scrollViewer"
                           HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto" >
@@ -141,7 +145,9 @@
             </ScrollViewer>
         </Border>
 
-        <Border Name="outputBrder" Grid.Row="3" BorderBrush="Black" BorderThickness="2" Grid.ColumnSpan="4">
+        <GridSplitter Grid.Row="4" Height="5" HorizontalAlignment="Stretch" />
+
+        <Border Name="outputBrder" Grid.Row="5" BorderBrush="Black" BorderThickness="2,0,2,2" Grid.ColumnSpan="4">
             <ScrollViewer x:Name="outputScrollViewer"
                           HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto" >

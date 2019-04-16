@@ -83,6 +83,7 @@ namespace ADTester
             {
                 //_viewModel.Code = ((IArbitraryAction) actionListBox.SelectedItem).Code;
                 _viewModel.SelectedAction = (IArbitraryAction)actionListBox.SelectedItem;
+                Dispatcher.BeginInvoke(new Action(() => { codeScrollViewer.ScrollToTop(); }));
                 //txtCode.Load();
             }
         }

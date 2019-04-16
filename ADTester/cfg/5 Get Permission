@@ -1,132 +1,128 @@
 int port = isSsl ? 636 : 389;
 string ldapBaseAddr = !string.IsNullOrWhiteSpace(specificServer) ? specificServer : domain;
 string ldapPath = string.Format("LDAP://{0}:{1}/RootDSE", ldapBaseAddr, port);
-sb.AppendLine(ldapPath);
+
 AuthenticationTypes authType = AuthenticationTypes.Secure;
 if (isSsl)
-	authType |= AuthenticationTypes.SecureSocketsLayer;
+    authType |= AuthenticationTypes.SecureSocketsLayer;
 if (!string.IsNullOrWhiteSpace(specificServer))
-	authType |= AuthenticationTypes.ServerBind;
+    authType |= AuthenticationTypes.ServerBind;
 
-sb.AppendLine("creating DirectoryEntry obj with username=" + username);
 DirectoryEntry directoryEntry = new DirectoryEntry(ldapPath, username, password, authType);
 
 string forestDN;
 using (directoryEntry)
 {
-    sb.AppendLine("Getting property 'rootDomainNamingContext'");
     forestDN = directoryEntry.Properties["rootDomainNamingContext"].Value as string;
-    sb.AppendLine("forestDN = " + forestDN);
-	//forestFQDN = getForestFqdn(forestDN);
 }
 
 directoryEntry = new DirectoryEntry();
             
-            // Set username and password
-            if (
-                username.Contains(@"\") ||
-                username.Contains(@"@")
-            )
-            {
-                directoryEntry.Username = username;
-            }
-            else
-            {
-                directoryEntry.Username = String.Format(@"{0}\{1}", domainNetbios, username);
-            }
+// Set username and password
+if (
+    username.Contains(@"\") ||
+    username.Contains(@"@")
+)
+{
+    directoryEntry.Username = username;
+}
+else
+{
+    directoryEntry.Username = String.Format(@"{0}\{1}", domainNetbios, username);
+}
 
-            directoryEntry.Password = password;
+directoryEntry.Password = password;
 
-            string domainDN = domain;
-            domainDN = Regex.Replace(
-                domainDN,
-                @"\.",
-                ",dc="
-            );
-            domainDN =
-                String.Format(
-                    "dc={0}",
-                    domainDN
-                );
+string domainDN = domain;
+domainDN = Regex.Replace(
+    domainDN,
+    @"\.",
+    ",dc="
+);
+domainDN =
+    String.Format(
+        "dc={0}",
+        domainDN
+    );
 
-            StringBuilder path = new StringBuilder();
-            path.AppendFormat(
-                "LDAP://{0}:{1}/{2}",
-                string.IsNullOrEmpty(specificServer) ? domain : specificServer,
-                port.ToString(),
-                "CN=Configuration," + forestDN
-            );
-			
-            directoryEntry.Path = path.ToString();
-			sb.AppendLine(path.ToString() + "  ");
+StringBuilder path = new StringBuilder();
+path.AppendFormat(
+    "LDAP://{0}:{1}/{2}",
+    string.IsNullOrEmpty(specificServer) ? domain : specificServer,
+    port.ToString(),
+    "CN=Configuration," + forestDN
+);
             
-            // setting the authentication type.
-            directoryEntry.AuthenticationType = AuthenticationTypes.Secure;
-
-            // adding to the base auth type
-            if (isSsl)
-            {
-                directoryEntry.AuthenticationType = directoryEntry.AuthenticationType |
-                                                    AuthenticationTypes.SecureSocketsLayer;
-            }
-
-            // adding to the base auth type
-            if (!string.IsNullOrEmpty(specificServer))
-            {
-                directoryEntry.AuthenticationType = directoryEntry.AuthenticationType |
-                                                    AuthenticationTypes.ServerBind;
-            }
-            string returnedSid = null;
-
-            // creating a temp directory searcher.
-            DirectorySearcher searcher = new DirectorySearcher(directoryEntry);
-
-            // setting the search scope.
-            searcher.SearchScope = SearchScope.Subtree;
-
-            // setting the timeout.
-            searcher.ClientTimeout = new TimeSpan(0, 0, seconds: 10);
-			searcher.PageSize = 100;
-
-            string dn = domainDN;
-
-			searcher.SearchScope = SearchScope.OneLevel;
-			searcher.PageSize = 512;
-
-			searcher.SearchRoot.Path = path.ToString();
-			searcher.Filter = null;
-
-			searcher.PropertiesToLoad.Clear();
-            searcher.PropertiesToLoad.Add("name");
-            searcher.PropertiesToLoad.Add("objectClass");
-            searcher.PropertiesToLoad.Add("distinguishedName");
-
-			sb.AppendLine("getting permission..");
-			
-			string[] extendedRightsProperties = new string[] {
-                "rightsGuid",
-                "displayName"
-            };
-			
-			// Configure the directory searcher
-            searcher.Filter = "(objectCategory=controlAccessRight)";
-            searcher.SearchScope = SearchScope.Subtree;
-            searcher.PropertiesToLoad.AddRange(extendedRightsProperties);
-            // Larger page sizes may cause the search to get only one page of objects
-            searcher.PageSize = 512;
-
-            SearchResultCollection extendedRightsFound;
+directoryEntry.Path = path.ToString();
+sb.AppendLine(path.ToString() + "  ");
             
-            using (extendedRightsFound = searcher.FindAll())
-            {
-                foreach (SearchResult searchResult in extendedRightsFound)
-                {
-                    // Get the extended right's wanted properties
-                    Guid rightsGuid = new Guid(searchResult.Properties["rightsGuid"][0].ToString());
-                    String displayName = searchResult.Properties["displayName"][0].ToString();
-                    // Some default extended rights have the same GUID, and we need to avoid those duplicates
+// setting the authentication type.
+directoryEntry.AuthenticationType = AuthenticationTypes.Secure;
 
-                    sb.AppendLine(string.Format("{0} - {1}", rightsGuid.ToString(), displayName));
+// adding to the base auth type
+if (isSsl)
+{
+    directoryEntry.AuthenticationType = directoryEntry.AuthenticationType |
+                                        AuthenticationTypes.SecureSocketsLayer;
+}
+
+// adding to the base auth type
+if (!string.IsNullOrEmpty(specificServer))
+{
+    directoryEntry.AuthenticationType = directoryEntry.AuthenticationType |
+                                        AuthenticationTypes.ServerBind;
+}
+string returnedSid = null;
+
+// creating a temp directory searcher.
+DirectorySearcher searcher = new DirectorySearcher(directoryEntry);
+
+// setting the search scope.
+searcher.SearchScope = SearchScope.Subtree;
+
+// setting the timeout.
+searcher.ClientTimeout = new TimeSpan(0, 0, seconds: 10);
+searcher.PageSize = 100;
+
+string dn = domainDN;
+
+searcher.SearchScope = SearchScope.OneLevel;
+searcher.PageSize = 512;
+
+searcher.SearchRoot.Path = path.ToString();
+searcher.Filter = null;
+
+searcher.PropertiesToLoad.Clear();
+searcher.PropertiesToLoad.Add("name");
+searcher.PropertiesToLoad.Add("objectClass");
+searcher.PropertiesToLoad.Add("distinguishedName");
+
+sb.AppendLine("getting permission..");
+            
+string[] extendedRightsProperties = new string[] {
+    "rightsGuid",
+    "displayName"
+};
+            
+// Configure the directory searcher
+searcher.Filter = "(objectCategory=controlAccessRight)";
+searcher.SearchScope = SearchScope.Subtree;
+searcher.PropertiesToLoad.AddRange(extendedRightsProperties);
+// Larger page sizes may cause the search to get only one page of objects
+searcher.PageSize = 512;
+
+SearchResultCollection extendedRightsFound;
+            
+using (extendedRightsFound = searcher.FindAll())
+{
+    foreach (SearchResult searchResult in extendedRightsFound)
+    {
+        // Get the extended right's wanted properties
+        Guid rightsGuid = new Guid(searchResult.Properties["rightsGuid"][0].ToString());
+        String displayName = searchResult.Properties["displayName"][0].ToString();
+        // Some default extended rights have the same GUID, and we need to avoid those duplicates
+
+        sb.AppendLine(string.Format("{0} - {1}", rightsGuid.ToString(), displayName));
                     
-                }
-            }
+    }
+}
