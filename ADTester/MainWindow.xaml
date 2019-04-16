@@ -124,7 +124,7 @@
                          SelectionChanged="logItemsListBox_OnSelectionChanged" >
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type local:LogErrorItem}">
-                            <TextBox MaxLines="1" TextWrapping="NoWrap" Foreground="Black" Background="OrangeRed"  Text="{Binding Message}"></TextBox>
+                            <TextBox MaxLines="1" TextWrapping="NoWrap" Foreground="Black" Background="DarkOrange"  Text="{Binding Message}"></TextBox>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type local:LogWarnItem}">
                             <TextBox MaxLines="1" TextWrapping="NoWrap" Foreground="Black" Background="DarkOrange" Text="{Binding Message}"></TextBox>

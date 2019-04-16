@@ -1,0 +1,137 @@
+DirectoryEntry directoryEntry = new DirectoryEntry();
+            int port = isSsl ? 636 : 389;
+            // Set username and password
+            if (
+                username.Contains(@"\") ||
+                username.Contains(@"@")
+            )
+            {
+                directoryEntry.Username = username;
+            }
+            else
+            {
+                directoryEntry.Username = String.Format(@"{0}\{1}", domainNetbios, username);
+            }
+
+            directoryEntry.Password = password;
+
+            string domainDN = domain;
+            domainDN = Regex.Replace(
+                domainDN,
+                @"\.",
+                ",dc="
+            );
+            domainDN =
+                String.Format(
+                    "dc={0}",
+                    domainDN
+                );
+
+            StringBuilder path = new StringBuilder();
+            path.AppendFormat(
+                "LDAP://{0}:{1}/{2}",
+                string.IsNullOrEmpty(specificServer) ? domain : specificServer,
+                port.ToString(),
+                "CN=Builtin," + domainDN
+            );
+			
+            directoryEntry.Path = path.ToString();
+			sb.AppendLine(path.ToString() + "  ");
+            
+            // setting the authentication type.
+            directoryEntry.AuthenticationType = AuthenticationTypes.Secure;
+
+            // adding to the base auth type
+            if (isSsl)
+            {
+                directoryEntry.AuthenticationType = directoryEntry.AuthenticationType |
+                                                    AuthenticationTypes.SecureSocketsLayer;
+            }
+
+            // adding to the base auth type
+            if (!string.IsNullOrEmpty(specificServer))
+            {
+                directoryEntry.AuthenticationType = directoryEntry.AuthenticationType |
+                                                    AuthenticationTypes.ServerBind;
+            }
+            string returnedSid = null;
+
+            // creating a temp directory searcher.
+            DirectorySearcher searcher = new DirectorySearcher(directoryEntry);
+
+            // setting the search scope.
+            searcher.SearchScope = SearchScope.Subtree;
+
+            // setting the timeout.
+            searcher.ClientTimeout = new TimeSpan(0, 0, seconds: 10);
+			searcher.PageSize = 100;
+
+            string dn = domainDN;
+
+			searcher.SearchScope = SearchScope.OneLevel;
+			searcher.PageSize = 512;
+
+			searcher.SearchRoot.Path = path.ToString();
+			searcher.Filter = null;
+
+			searcher.PropertiesToLoad.Clear();
+            searcher.PropertiesToLoad.Add("name");
+            searcher.PropertiesToLoad.Add("objectClass");
+            searcher.PropertiesToLoad.Add("distinguishedName");
+
+			sb.AppendLine("searching one level down..");
+			using (SearchResultCollection searchResults = searcher.FindAll())
+            {
+                foreach (SearchResult searchResult in searchResults)
+                {
+
+                    // Most likely due to lack of permissions
+                    if (searchResult.Properties["distinguishedName"].Count == 0)
+                    {
+                        ResultPropertyValueCollection adsPathCollection = searchResult.Properties["adspath"];
+                        string adsPath = adsPathCollection.Count > 0 ? adsPathCollection[0].ToString() : "UNKNOWN";
+                        string errorMessage =
+                            string.Format("Could not get object \"{0}\". Most likely due to lack of permissions",
+                                adsPath);
+                        sb.AppendLine(errorMessage);
+                        continue;
+                    }
+
+                    string childDN = searchResult.Properties["distinguishedName"][0] as string;
+
+                    ResultPropertyValueCollection nameProperty = searchResult.Properties["name"];
+
+                    if (nameProperty != null && nameProperty.Count > 0)
+                    {
+
+                        string childObjectName = nameProperty[0].ToString();
+
+                        // Determine the child object's type
+                        ResultPropertyValueCollection childObjectClassValues =
+                            searchResult.Properties["objectClass"];
+
+
+                        //Common.Constants.BusinessServiceType childObjectType =
+                        //    determineObjectType(
+                        //        childObjectClassValues,
+                        //        childDN,
+                        //        ref handledGPOResource
+                        //    );
+
+                        sb.AppendLine(String.Format(
+                            "{0,-30} {1,-70}",
+                            (childObjectName == null) ? "NULL" : childObjectName,
+                            (childDN == null) ? "NULL" : childDN
+                        ));
+
+                    }
+                    else 
+                    {
+                        sb.AppendLine(string.Format(
+                            "Skipping {0} because its {1} property is null or empty",
+                            childDN,
+                            "name")
+                        );
+                    }
+                }
+            }

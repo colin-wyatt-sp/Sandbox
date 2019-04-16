@@ -8,10 +8,12 @@ if (isSsl)
 if (!string.IsNullOrWhiteSpace(specificServer))
 	authType |= AuthenticationTypes.ServerBind;
 
+sb.AppendLine("creating DirectoryEntry obj with username=" + username);
 DirectoryEntry directoryEntry = new DirectoryEntry(ldapPath, username, password, authType);
 
 using (directoryEntry)
 {
+    sb.AppendLine("Getting property 'rootDomainNamingContext'");
     string forestDN = directoryEntry.Properties["rootDomainNamingContext"].Value as string;
     sb.AppendLine("forestDN = " + forestDN);
 }

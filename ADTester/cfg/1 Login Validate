@@ -67,6 +67,7 @@ DirectorySearcher ds = new DirectorySearcher(de);
 ds.Filter = "(" + "SAMAccountName" + "=" + username + ")";
 ds.PropertiesToLoad.Add("cn");
 
+sb.AppendLine(string.Format("Filter='{0}'  propertiesAdded=cn", ds.Filter));
 SearchResult sr = ds.FindOne();
 
 if (sr == null) {

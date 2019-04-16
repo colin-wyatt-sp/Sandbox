@@ -35,13 +35,6 @@ namespace ADTester {
                 //OutputText += file + Environment.NewLine;
                 ActionList.Add(new ArbitraryActiveDirectoryAction(new FileInfo(file).Name, File.ReadAllText(file)));
             }
-
-            
-            //TODO: rem
-            Domain = "siqsus.forest";
-            DomainNetbios = "siqsus";
-            SpecificServer = string.Empty;
-            Username = "Administrator";
         }
 
         public string Username
