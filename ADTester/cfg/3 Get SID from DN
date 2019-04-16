@@ -1,0 +1,132 @@
+DirectoryEntry directoryEntry = new DirectoryEntry();
+            int port = isSsl ? 636 : 389;
+            // Set username and password
+            if (
+                username.Contains(@"\") ||
+                username.Contains(@"@")
+            )
+            {
+                directoryEntry.Username = username;
+            }
+            else
+            {
+                directoryEntry.Username = String.Format(@"{0}\{1}", domainNetbios, username);
+            }
+
+            directoryEntry.Password = password;
+
+            string domainDN = domain;
+            domainDN = Regex.Replace(
+                domainDN,
+                @"\.",
+                ",dc="
+            );
+            domainDN =
+                String.Format(
+                    "dc={0}",
+                    domainDN
+                );
+
+            StringBuilder path = new StringBuilder();
+            path.AppendFormat(
+                "LDAP://{0}:{1}/{2}",
+                string.IsNullOrEmpty(specificServer) ? domain : specificServer,
+                port.ToString(),
+                domainDN
+            );
+            directoryEntry.Path = path.ToString();
+			sb.Append(path.ToString() + "  ");
+            
+            // setting the authentication type.
+            directoryEntry.AuthenticationType = AuthenticationTypes.Secure;
+
+            // adding to the base auth type
+            if (isSsl)
+            {
+                directoryEntry.AuthenticationType = directoryEntry.AuthenticationType |
+                                                    AuthenticationTypes.SecureSocketsLayer;
+            }
+
+            // adding to the base auth type
+            if (!string.IsNullOrEmpty(specificServer))
+            {
+                directoryEntry.AuthenticationType = directoryEntry.AuthenticationType |
+                                                    AuthenticationTypes.ServerBind;
+            }
+            string returnedSid = null;
+
+            // creating a temp directory searcher.
+            DirectorySearcher searcher = new DirectorySearcher(directoryEntry);
+
+            // setting the search scope.
+            searcher.SearchScope = SearchScope.Subtree;
+
+            // setting the timeout.
+            searcher.ClientTimeout = new TimeSpan(0, 0, seconds: 10);
+
+            string dn = domainDN;
+
+            if (searcher != null)
+            {
+
+                try
+                {
+
+                    // Get all policies from the Active Directory domain
+                    searcher.SearchScope = SearchScope.Base;
+                    searcher.PropertiesToLoad.AddRange(
+                        new string[] { "objectSid" }
+                    );
+
+                    // Set the LDAP query filter
+                    searcher.Filter =
+                        string.Format(
+                            "{0}={1}",
+                            "distinguishedName",
+                            dn
+                        );
+					sb.AppendLine("Filter=\"" + searcher.Filter + "\"");
+                    // Find the Sid
+                    SearchResult domainFound = searcher.FindOne();
+					sb.AppendLine("found domain. getting objectSid..");
+                    if (domainFound != null)
+                    {
+
+                        // Get the sid as a byte array
+                        byte[] sidBytes = (byte[])domainFound.Properties["objectSid"][0];
+						
+                        // Create SecurityIdentifier
+                        System.Security.Principal.SecurityIdentifier sid = new System.Security.Principal.SecurityIdentifier(sidBytes, 0);
+
+                        // Return the Sid as string
+                        returnedSid = sid.Value;
+                        sb.AppendLine("Successfully got SID: " + returnedSid);
+                    }
+                    else
+                    {
+                        sb.AppendLine(string.Format("Attempt to get object's Sid failed. Object's DN: {0}", dn));
+                    }
+
+
+                }
+ //               catch (System.Runtime.InteropServices.COMException ex)
+ //               {
+ //                   sb.AppendLine(string.Format("Error in '{0}'.  -> {1}", dn, ex.ToString()));
+ //               }
+ //               catch (Exception ex)
+ //               {
+ //                   sb.AppendLine(
+ //                       string.Format(
+ //                           "Error fetching object's sid. Object DN: {0}.   -> {1}",
+ //                           dn, ex.ToString()
+ //                       ));
+ //               }
+                finally
+                {
+                    if (searcher != null)
+                    {
+                        searcher.Dispose();
+                    }
+                }
+
+            }

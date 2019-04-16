@@ -21,6 +21,8 @@ namespace ADTester {
         private string _specificServer;
         private string _username;
         private string _domainNetbios;
+        private IArbitraryAction _selectedAction;
+        private LogItem _selectedLogItem;
 
         public ActiveDirectoryTesterViewModel() {
             BindingOperations.EnableCollectionSynchronization(_logItems, _lockObject);
@@ -30,7 +32,7 @@ namespace ADTester {
                 Path.Combine(new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName, "cfg");
             foreach (string file in Directory.GetFiles(actionFilesDir))
             {
-                OutputText += file + Environment.NewLine;
+                //OutputText += file + Environment.NewLine;
                 ActionList.Add(new ArbitraryActiveDirectoryAction(new FileInfo(file).Name, File.ReadAllText(file)));
             }
 
@@ -86,6 +88,16 @@ namespace ADTester {
 
         public ObservableCollection<IArbitraryAction> ActionList { get; }
 
+        public IArbitraryAction SelectedAction
+        {
+            get => _selectedAction;
+            set
+            {
+                _selectedAction = value; 
+                onPropertyChanged();
+            }
+        }
+
         public IActionResult ActionResult
         {
             get => _actionResult;
@@ -122,6 +134,16 @@ namespace ADTester {
             set
             {
                 _domainNetbios = value; 
+                onPropertyChanged();
+            }
+        }
+
+        public LogItem SelectedLogItem
+        {
+            get => _selectedLogItem;
+            set
+            {
+                _selectedLogItem = value; 
                 onPropertyChanged();
             }
         }

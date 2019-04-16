@@ -45,7 +45,7 @@ path.AppendFormat(
     domainDN
 );
 de.Path = path.ToString();
-
+sb.AppendLine(de.Path + "  Username=" + de.Username);
 // setting the authentication type.
 de.AuthenticationType = AuthenticationTypes.Secure;
 

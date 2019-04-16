@@ -48,19 +48,38 @@ namespace ADTester
         {
             _viewModel.LogItems.Add(logItem);
             Dispatcher.BeginInvoke(new Action(() => { scrollViewer.ScrollToEnd(); }));
-            _viewModel.OutputText = logItem.ActionResult.Output;
+            //_viewModel.OutputText = logItem.ActionResult.Output;
+            _viewModel.SelectedLogItem = logItem;
         }
 
         private void ToggleAllCheckbox_Checked(object sender, RoutedEventArgs e)
         {
-            //TODO: togle arbitary actions list
+            SelectAll(true);
         }
 
-        private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ToggleAllCheckbox_OnUnchecked(object sender, RoutedEventArgs e)
+        {
+            SelectAll(false);
+        }
+
+        private void SelectAll(bool select)
+        {
+            if (actionListBox == null) return;
+            var all = actionListBox.ItemsSource as IEnumerable<IArbitraryAction>;
+            if (all != null)
+            {
+                foreach (var source in all)
+                    source.IsEnabled = select;
+            }
+        }
+
+        private void actionListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (actionListBox.SelectedItem != null)
             {
-                _viewModel.Code = ((IArbitraryAction) actionListBox.SelectedItem).Code;
+                //_viewModel.Code = ((IArbitraryAction) actionListBox.SelectedItem).Code;
+                _viewModel.SelectedAction = (IArbitraryAction)actionListBox.SelectedItem;
+                //txtCode.Load();
             }
         }
 
@@ -87,8 +106,27 @@ namespace ADTester
                 passwordBox.Password, 
                 isSslCheckbox.IsChecked != null && isSslCheckbox.IsChecked.Value);
             var result = action.executeAction();
-            Logger.log(result);
+
+            if (result != null) {
+                Logger.log(result);
+            }
         }
 
+        private void logItemsListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (logItemsListBox.SelectedItem != null)
+            {
+                //_viewModel.OutputText = ((LogItem) logItemsListBox.SelectedItem).ActionResult.Output;
+                _viewModel.SelectedLogItem = ((LogItem)logItemsListBox.SelectedItem);
+            }
+        }
+
+
+
+        private void ClearButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            _viewModel.LogItems.Clear();
+            _viewModel.SelectedLogItem = null;
+        }
     }
 }

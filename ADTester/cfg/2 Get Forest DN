@@ -1,5 +1,5 @@
 int port = isSsl ? 636 : 389;
-string ldapBaseAddr = !string.IsNullOrWhiteSpace(specificServer) ? specificServer : domainNetbios;
+string ldapBaseAddr = !string.IsNullOrWhiteSpace(specificServer) ? specificServer : domain;
 string ldapPath = string.Format("LDAP://{0}:{1}/RootDSE", ldapBaseAddr, port);
 sb.AppendLine(ldapPath);
 AuthenticationTypes authType = AuthenticationTypes.Secure;
