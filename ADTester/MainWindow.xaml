@@ -10,6 +10,9 @@
         d:DataContext="{d:DesignInstance Type=local:ActiveDirectoryTesterViewModel, IsDesignTimeCreatable=True}"
         
         >
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding ToggleCodeEdit}" Key="F5"/>
+    </Window.InputBindings>
     <Window.Resources>
         <Style TargetType="ListBoxItem">
             <Style.Triggers>
@@ -19,6 +22,7 @@
             </Style.Triggers>
         </Style>
         <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
+        
     </Window.Resources>
     
     <Grid>

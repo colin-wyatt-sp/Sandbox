@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using ADTester.Annotations;
 using ADTester.Interfaces;
 using ADTester.Model.Data;
@@ -35,6 +37,16 @@ namespace ADTester {
             {
                 //OutputText += file + Environment.NewLine;
                 ActionList.Add(new ArbitraryActiveDirectoryAction(new FileInfo(file).Name, File.ReadAllText(file)));
+            }
+        }
+
+        private ICommand toggleCodeEdit;
+        public ICommand ToggleCodeEdit
+        {
+            get
+            {
+                return toggleCodeEdit
+                       ?? (toggleCodeEdit = new ActionCommand(() => { IsCodeEditEnabled = !IsCodeEditEnabled; }));
             }
         }
 
