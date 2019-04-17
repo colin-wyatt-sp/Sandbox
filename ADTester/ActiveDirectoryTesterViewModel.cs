@@ -23,6 +23,7 @@ namespace ADTester {
         private string _domainNetbios;
         private IArbitraryAction _selectedAction;
         private LogItem _selectedLogItem;
+        private bool _isCodeEditEnabled;
 
         public ActiveDirectoryTesterViewModel() {
             BindingOperations.EnableCollectionSynchronization(_logItems, _lockObject);
@@ -34,6 +35,16 @@ namespace ADTester {
             {
                 //OutputText += file + Environment.NewLine;
                 ActionList.Add(new ArbitraryActiveDirectoryAction(new FileInfo(file).Name, File.ReadAllText(file)));
+            }
+        }
+
+        public bool IsCodeEditEnabled
+        {
+            get => _isCodeEditEnabled;
+            set
+            {
+                _isCodeEditEnabled = value;
+                onPropertyChanged();
             }
         }
 

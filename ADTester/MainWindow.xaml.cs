@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ADTester.Interfaces;
 using ADTester.Model.Data;
+using ADTester.Properties;
 
 namespace ADTester
 {
@@ -29,7 +30,9 @@ namespace ADTester
         public MainWindow()
         {
             InitializeComponent();
-            _viewModel = new ActiveDirectoryTesterViewModel();
+            var activeDirectoryTesterViewModel = new ActiveDirectoryTesterViewModel();
+            activeDirectoryTesterViewModel.IsCodeEditEnabled = Settings.Default.IsCodeEditEnabled;
+            _viewModel = activeDirectoryTesterViewModel;
             DataContext = _viewModel;
             Logger.MessageLogged += loggerMessageLogged;
 

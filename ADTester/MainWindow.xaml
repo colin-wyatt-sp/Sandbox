@@ -18,6 +18,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
     </Window.Resources>
     
     <Grid>
@@ -106,7 +107,9 @@
 
                 <ScrollViewer x:Name="codeScrollViewer" Grid.Column="1"
                               HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto" >
+                              VerticalScrollBarVisibility="Auto"
+                              Visibility="{Binding IsCodeEditEnabled, Converter={StaticResource VisibleIfTrueConverter}}"
+                              >
                     <TextBox DataContext="{Binding SelectedAction}" Name="codeTextBlock"  Text="{Binding Code}" IsReadOnly="False" />
                    
                 </ScrollViewer>
